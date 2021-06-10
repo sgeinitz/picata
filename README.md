@@ -13,5 +13,5 @@ PICA TA is a tool for instructors whose primary function is to use the results o
 
 __Initiating a post-quiz PI/CL sessions__ 
 
-Currently PICA TA does not generate the details/guidelines for the PI/CL session. Rather, the functionality provided focused on initiating the session, which involves: a) selecting a quiz and quiz question, b) selecting and confirming pairs/groups of students for the PI/CL session, and c) notifying students via a Canvas message of who they will work with. The intention (for now) is that the instructor will present students with all of the requisite material for the follow-up session. To see what the current functionality looks like in more detail, see this page with included screen shots and info.
+Currently PICA TA does not generate the details/guidelines for the PI/CL session. Rather, the functionality provided focuses on initiating the session, which involves: a) selecting a quiz and quiz question, b) selecting and confirming pairs/groups of students for the PI/CL session, and c) notifying students via a Canvas message of who they will work with. The intention (for now) is that the instructor will present students with all of the requisite material for the follow-up PI session. See below for more details on what it looks like to carry out these individual steps.
 
