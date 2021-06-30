@@ -290,7 +290,13 @@ for pair in pairs:
 # send a message (i.e. a Canvas Conversation) to a person (testing w/ Malcolm)
 # Malcolm's canvas id is 31078
 # Skylar's is 42374
-recipients = [str(31078), str(42374)]
+# Tested on June 30, 2021:
+#recipients = [str(31078), str(42374)]
+#num_students = 2
+#names = ['Skylar, Malcolm']
+#names_str = ", ".join(names)
+#message_str = message_template.format(names_str, message_dict1[num_students], question_text)
+#convo = canvas.create_conversation(recipients, message_str, subject=subject_str)
 
 #convo = canvas.create_conversation(recipients, message, subject="test message")
 # note: create_convo returns a list, so here convo[0] is the Conversation object
