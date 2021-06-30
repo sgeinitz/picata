@@ -36,12 +36,11 @@ def selectFromList(paginatedList):
         print("[", i, "]", so)
         subobject_list.append(so)
     str_index = input("Select item from list above (using index in '[]'): ")
-    try: 
-        if int(str_index) >= 0 or int(str_index) < i:
-            int_index = int(str_index)
-    except IndexError:
-        print("Invalid selection")
-    return subobject_list[int_index]
+
+    if int(str_index) < 0 or int(str_index) >= i:
+        raise IndexError("Invalid selection")
+
+    return subobject_list[int(str_index)]
         
 
 # Initialize a new Canvas object and prompt the user to select a course.
@@ -147,6 +146,8 @@ for i, id1 in enumerate(student_ids):
             #print(id2, "values =", y.values)
             y = df.loc[df.id == id2, df.columns.str.endswith('_score')]
             dist = distance.euclidean(x, y)
+            if dist == 0:
+                dist = 1E-4
             #dist = distance.cosine(x, y)
             quiz_distances[id1][id2] = dist
             quiz_distances[id2][id1] = dist
@@ -173,32 +174,123 @@ plt.savefig(file_prefix + 'quiz_' + str(chosen_quiz.id) + "_" + datetime.datetim
 plt.show()
 
 
-# Next step is to create a dataframe with 3 columns: student_1_id, student_2_id,
-# dist_student1_to_student2, then to find pairs of students to be grouped
-# together (being careful not to include a person more than once). There are
-# other, better ways to do this, but this will be the most flexible since we may
-# want to include other criteria for selecting pairs/small groups. 
-# See np.meshgrid for one example of making the grid, ex:
-# https://stackoverflow.com/questions/12130883/r-expand-grid-function-in-python
+def vectorDistancePairings(dist_mat, method='med'):
+
+    dm = dist_mat.copy()
+    pairings = []
+
+    while dm.shape[0] > 2:
+
+        # retrieve max entry in each column/row and corresponding index
+        # (note that indices and columns are canvas student ids)
+        col_maximums = dm.max()
+        col_max_indices = dm.idxmax()  #for col in quiz_distances.columns]
+
+        # 'max' is a greedy approach taking largest pair difference first
+        if method == 'max':
+            person_A = col_maximums.idxmax()
+        # 'med' is median difference and generally leads to highest mean diff and lowest variance 
+        elif method == 'med':
+            col_maximums.sort_values(inplace=True)
+            person_A = col_maximums.index[len(col_maximums)//2]
+        # 'min' uses conservative approach by taking min pair difference but often leads to high var
+        elif method == 'min':
+            person_A = col_maximums.idxmin()
+        else:
+            raise ValueError("vectorDistancePairings(): invalid method")
+        person_B = col_max_indices[person_A]
+        pairings.append((person_A, person_B, col_maximums[person_A]))
+   
+        dm.drop(index=person_A, axis=0, inplace=True)
+        dm.drop(person_A, axis=1, inplace=True)
+        dm.drop(index=person_B, axis=0, inplace=True)
+        dm.drop(person_B, axis=1, inplace=True)
+
+        assert dm.shape[0] == dm.shape[1]
+
+    if dm.shape[0] == 2:
+        pairings.append((dm.index[0], dm.index[1], dm.iat[0,1]))
+    else:
+        assert dm.shape == (1,1)
+        temp_tuple = pairings[-1]
+        pairings[-1] = (temp_tuple[0], temp_tuple[1], dm.index[0], temp_tuple[2])
+
+    stats_tmp = [ x[-1] for x in pairings ]
+    mean_pair_dist = sum(stats_tmp) / len(stats_tmp)
+    var_pair_dist = sum([ (x[-1] - mean_pair_dist)**2 for x in pairings ]) / len(stats_tmp)
+    print("mean pairing distances =", mean_pair_dist)
+    print(" var pairing distances =", var_pair_dist)
+
+    return pairings
+
+vectorDistancePairings(quiz_distances, method='max')
+vectorDistancePairings(quiz_distances, method='min')
+pairs = vectorDistancePairings(quiz_distances, method='med')
 
 
-# What was the most missed question? This will be used in the body of the message. 
-# Suggest to the user that they look at the output of the histgram for all quiz questions. 
-# Also show the following link and suggest that the user click on it to see the full quiz 
-# before finalizing their decision on which question to use (link: chosen_quiz.html_url).
+# Before composing the message first need to choose the question
+prompt = "Select index of quiz question to be used for PI session \n(also see stat visualization in image files produced): "
+for i,q in enumerate(quiz_questions):
+    print("[" + str(i) + "]") 
+    print("  question id =", q.id)
+    print("  text =", repr(q.question_text[0:80]))
+    print("  mean score =", round(quiz_question_stats[str(q.id)]['mean'], 2))
+    print("  variance =", round(quiz_question_stats[str(q.id)]['var'], 2))
+    print("  number of zeros =", quiz_question_stats[str(q.id)]['n_zeros'])
+
+selected_question = input(prompt)
+if int(selected_question) <= 0 or int(selected_question) >= len(quiz_questions):
+    raise IndexError("Invalid selection")
+
+print("Question selected:")
+print("  id =", selected_question)
+print("  text =", quiz_questions[int(selected_question)].question_text)
+question_text = quiz_questions[int(selected_question)].question_text
+
+
+# For now, students present for the PI session that did not take the quiz will
+# be assigned to an existing pair when we are physically in class.  In the
+# future this should be done by running this immediately at the start of class,
+# but right after present students have replied with that day's 'quiz word'. 
+
+
+# Message template to be sent to student pairs in Canvas. The user should be
+# able to customize this message each time the program is run, rather than it
+# being hard-coded here. One option is to prompt the user to input the message
+# when the program runs. Or, to prompt them to specify an input file that will
+# contain the message template. 
+message_template = "Hello {},\n  In our upcoming class session the {} of you \
+will meet to work out a problem together. If you don't already know one another, \
+then it may be helpful to plan on meeting in a certain section of the room, or a \
+share a distinguishing feature (e.g. 'I have a red hat on today'). \n\nThere \
+is no preparation required on your part, however, if you want to see the type of \
+problem you'll see today you can refer to the quiz question shown below. Please \
+wait until class for more details. \n\nBest,\nSteve \n \nQuestion from previous quiz: {}"
+
+message_dict1 = {2: 'two', 3:'three'}
+
+subject_str = "Today's quiz review session - " + datetime.datetime.today().strftime('%Y.%m.%d')
+
+# Individual messages to be sent
+for pair in pairs:
+    num_students = len(pair) - 1
+    recipient_canvas_ids = [str(id) for id in pair[0:-1]]
+    print("recipients =", recipient_canvas_ids)
+    names = [chosen_course.get_user(id).name.split()[0] for id in pair[0:-1]]
+    names.sort()
+    print("names =", names)
+    names_str = ", ".join(names)
+    message_str = message_template.format(names_str, message_dict1[num_students], question_text)
+    print("message =")
+    print(message_str)
+    #convo = canvas.create_conversation(recipient_canvas_ids, message_str, subject=subject_str)
+
 
 
 # send a message (i.e. a Canvas Conversation) to a person (testing w/ Malcolm)
 # Malcolm's canvas id is 31078
-recipients = [str(31078)]
-message = "Hi Malcolm, \n\n    I hope everything is going well with you. Don't \
-mind this message at all, I'm just working on the tool for 2050 to group \
-students together for a quick peer-learning session. Using Slack/MS Teams would\
-be better, but Canvas is faster to implement and will help to decide whether it\
-it is something work pursuing.  If you are interested in seeing it at all, \
-I'll try and put it up on github sooner rather than later although no worries if not.\
-\n\nHave a good break! "
-print(message)
+# Skylar's is 42374
+recipients = [str(31078), str(42374)]
 
 #convo = canvas.create_conversation(recipients, message, subject="test message")
 # note: create_convo returns a list, so here convo[0] is the Conversation object
