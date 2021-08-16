@@ -258,7 +258,7 @@ question_text = quiz_questions[int(selected_question)].question_text
 # able to customize this message each time the program is run, rather than it
 # being hard-coded here. One option is to prompt the user to input the message
 # when the program runs. Or, to prompt them to specify an input file that will
-# contain the message template. 
+# contain the message template.
 message_template = "Hello {},\n  In our upcoming class session the {} of you \
 will meet to work out a problem together. If you don't already know one another, \
 then it may be helpful to plan on meeting in a certain section of the room, or a \
@@ -287,13 +287,10 @@ for pair in pairs:
 
 
 
-# send a message (i.e. a Canvas Conversation) to a person (testing w/ Malcolm)
-# Malcolm's canvas id is 31078
-# Skylar's is 42374
-# Tested on June 30, 2021:
+# Send a test message (i.e. a Canvas Conversation) to M and S (June 30, 2021)
 #recipients = [str(31078), str(42374)]
 #num_students = 2
-#names = ['Skylar, Malcolm']
+#names = ['S, M']
 #names_str = ", ".join(names)
 #message_str = message_template.format(names_str, message_dict1[num_students], question_text)
 #convo = canvas.create_conversation(recipients, message_str, subject=subject_str)
