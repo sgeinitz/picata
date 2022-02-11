@@ -50,8 +50,8 @@ def selectCourse(canvas):
     valid_courses = []
     for course in canvas.get_courses():
         try:
-            # Exclude expired courses
-            canvas.get_course(course.id)
+            # Exclude expired courses without names
+            course.name
             valid_courses.append(course)
         except Exception:
             pass
