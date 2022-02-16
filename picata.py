@@ -42,10 +42,34 @@ def selectFromList(paginatedList):
 
     return subobject_list[int(str_index)]
         
+def selectCourse(canvas):
+    """
+    Given a canvas instance object, display a list of courses and prompt
+    the user to select a course. The selected course is returned.
+    """
+    valid_courses = []
+    for course in canvas.get_courses():
+        try:
+            # Exclude expired courses without names
+            course.name
+            valid_courses.append(course)
+        except Exception:
+            pass
+    
+    for i, course in enumerate(valid_courses):
+        print("[", i, "]", course.name)
+    str_index = int(input("Select a course from the list above (using index in \'[]\'): "))
 
-# Initialize a new Canvas object and prompt the user to select a course.
+    if int(str_index) < 0 or int(str_index) >= len(valid_courses):
+        raise IndexError("Invalid selection")
+
+    return canvas.get_course(valid_courses[str_index].id)
+
+# Initialize a new Canvas object
 canvas = canvasapi.Canvas(API_URL, API_KEY)
-chosen_course = selectFromList(canvas.get_courses())
+
+#Prompt the user to select a course
+chosen_course = selectCourse(canvas)
 print(f"\n\nSelected course: {chosen_course.name}")
 
 # Then prompt them to select a quiz to use
