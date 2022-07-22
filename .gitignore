@@ -1,4 +1,4 @@
-# Byte-compiled / optimized / DLL files
+# byte-compiled / optimized / dll files
 __pycache__/
 *.py[cod]
 *$py.class
@@ -9,3 +9,6 @@ __pycache__/
 *.pickle
 *.pkl
 *.png
+
+# file with personal tokens for canvas api
+set_env.sh
