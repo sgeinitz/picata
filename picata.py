@@ -142,7 +142,7 @@ for key, val in quiz_question_stats.items():
 
 # draw a histogram for scores of each question
 mpl.style.use('seaborn')
-figure, axis = plt.subplots(1, 5, sharey=True)
+figure, axis = plt.subplots(1, len(quiz_question_ids), sharey=True)
 figure.set_size_inches(13, 3)
 for i, q in enumerate(quiz_question_ids):
     score_col = q + '_score'
