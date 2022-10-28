@@ -163,12 +163,12 @@ student_ids.sort()
 quiz_distances = pd.DataFrame(0.0, columns=student_ids, index=student_ids)
 
 for i, id1 in enumerate(student_ids):
-    x = df.loc[df.id == id1, df.columns.str.endswith('_score')]
+    x = df.loc[df.id == id1, df.columns.str.endswith('_score')].to_numpy().flatten()
     #print(id1, "values =", x.values)
     for j, id2 in enumerate(student_ids):
         if i < j:
             #print(id2, "values =", y.values)
-            y = df.loc[df.id == id2, df.columns.str.endswith('_score')]
+            y = df.loc[df.id == id2, df.columns.str.endswith('_score')].to_numpy().flatten()
             dist = distance.euclidean(x, y)
             if dist == 0:
                 dist = 1E-4
