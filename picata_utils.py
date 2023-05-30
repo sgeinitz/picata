@@ -67,8 +67,8 @@ def sendMessage(pica_course, pairs):
     wait until class for more details. \n\nBest,\nSteve \n \nQuestion from previous quiz: {}"
 
     message_dict1 = {2: 'two', 3:'three'}
-
     subject_str = "Today's quiz review session - " + datetime.datetime.today().strftime('%Y.%m.%d')
+    question_text = "A question from the quiz will be shown here."
 
     # Individual messages to be sent
     for pair in pairs:
