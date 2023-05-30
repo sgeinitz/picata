@@ -10,9 +10,9 @@ import seaborn as sbn
 
 
 def selectFromList(paginated_list, item_type="item"):
-    """ 
-    A general function that takes a canvasapi paginated_list object 
-    and lists each item in it, then prompts user to select one item. 
+    """
+    A general function that takes a canvasapi paginated_list object
+    and lists each item in it, then prompts user to select one item.
     """
     i = 0
     subobject_list = []
@@ -52,11 +52,13 @@ def selectCourse(canvas):
 
 
 def sendMessage(pica_course, pairs):
-    # Message template to be sent to student pairs in Canvas. The user should be
-    # able to customize this message each time the program is run, rather than it
-    # being hard-coded here. One option is to prompt the user to input the message
-    # when the program runs. Or, to prompt them to specify an input file that will
-    # contain the message template.
+    """
+    Message template to be sent to student pairs in Canvas. The user should be
+    able to customize this message each time the program is run, rather than it
+    being hard-coded here. One option is to prompt the user to input the message
+    when the program runs. Or, to prompt them to specify an input file that will
+    contain the message template.
+    """
     message_template = "Hello {},\n  In our upcoming class session the {} of you \
     will meet to work out a problem together. If you don't already know one another, \
     then it may be helpful to plan on meeting in a certain section of the room, or a \
@@ -65,7 +67,7 @@ def sendMessage(pica_course, pairs):
     problem you'll see today you can refer to the quiz question shown below. Please \
     wait until class for more details. \n\nBest,\nSteve \n \nQuestion from previous quiz: {}"
 
-    message_dict1 = {2: 'two', 3:'three'}
+    message_dict1 = {2: 'two', 3: 'three'}
     subject_str = "Today's quiz review session - " + datetime.datetime.today().strftime('%Y.%m.%d')
     question_text = "A question from the quiz will be shown here."
 
@@ -81,17 +83,10 @@ def sendMessage(pica_course, pairs):
         message_str = message_template.format(names_str, message_dict1[num_students], question_text)
         print("message =")
         print(message_str)
-        #convo = canvas.create_conversation(recipient_canvas_ids, message_str, subject=subject_str)
 
-    # Send a test message (i.e. a Canvas Conversation) to M and S (June 30, 2021)
-    #recipients = [str(31078), str(42374)]
-    #num_students = 2
-    #names = ['S, M']
-    #names_str = ", ".join(names)
-    #message_str = message_template.format(names_str, message_dict1[num_students], question_text)
-    #convo = canvas.create_conversation(recipients, message_str, subject=subject_str)
-    #convo = canvas.create_conversation(recipients, message, subject="test message")
-    # note: create_convo returns a list, so here convo[0] is the Conversation object
+        # Create_convo returns a list, so here convo[0] is the conversation object
+        convo = canvas.create_conversation(recipient_canvas_ids, message_str, subject=subject_str)
+
     return None
 
 
