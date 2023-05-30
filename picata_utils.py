@@ -1,15 +1,13 @@
 import datetime
 import requests
 import time
-import os
 import pandas as pd
-import numpy as np
 import scipy.stats as stats
 import scipy.spatial.distance as distance
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import seaborn as sbn
-import canvasapi
+
 
 def selectFromList(paginated_list, item_type="item"):
     """ 
@@ -27,6 +25,7 @@ def selectFromList(paginated_list, item_type="item"):
         raise IndexError("Invalid selection")
 
     return subobject_list[int(str_index)]
+
         
 def selectCourse(canvas):
     """
