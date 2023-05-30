@@ -26,7 +26,7 @@ def selectFromList(paginated_list, item_type="item"):
 
     return subobject_list[int(str_index)]
 
-        
+
 def selectCourse(canvas):
     """
     Given a canvas instance object, display a list of courses and prompt
@@ -40,7 +40,7 @@ def selectCourse(canvas):
             valid_courses.append(course)
         except Exception:
             pass
-    
+
     for i, course in enumerate(valid_courses):
         print(f"[ {i:2d} ] {course.name}")
     str_index = int(input("Select a course from the list above (using index in \'[]\'): "))
@@ -187,11 +187,11 @@ class PicaQuiz:
         for q in self.quiz_question_ids:
             score_col = q + '_score'
             self.question_stats[q] = {
-                'mean' : self.quiz_df[score_col].mean(),
-                'var' : self.quiz_df[score_col].var(),
-                'n_zeros' : sum(self.quiz_df[score_col] == 0.0),
-                'n_ones' : sum(self.quiz_df[score_col] == 1.0),
-                'entropy' : stats.entropy(self.quiz_df[score_col])
+                'mean': self.quiz_df[score_col].mean(),
+                'var': self.quiz_df[score_col].var(),
+                'n_zeros': sum(self.quiz_df[score_col] == 0.0),
+                'n_ones': sum(self.quiz_df[score_col] == 1.0),
+                'entropy': stats.entropy(self.quiz_df[score_col])
             }
 
         if verbose:
@@ -213,7 +213,7 @@ class PicaQuiz:
         axis[0].set_ylabel('# of people')
         #plt.subplots_adjust(left=0.05, right=0.98, bottom=0.15, top=0.9)
         plt.tight_layout()
-        figure.savefig(self.config.file_prefix + str(self.canvas_quiz.id) + "_" + \
+        figure.savefig(self.config.file_prefix + str(self.canvas_quiz.id) + "_" +
                        datetime.datetime.today().strftime('%Y%m%d') + "_histograms.png", dpi=200)
 
         if show_plot:
@@ -228,10 +228,12 @@ class PicaQuiz:
 
         for i, id1 in enumerate(student_ids):
             x = self.quiz_df.loc[self.quiz_df.id == id1, self.quiz_df.columns.str.endswith('_score')].to_numpy().flatten()
-            #print(id1, "values =", x.values)
+            if verbose:
+                print(id1, "values =", x.values)
             for j, id2 in enumerate(student_ids):
                 if i < j:
-                    #print(id2, "values =", y.values)
+                    if verbose:
+                        print(id2, "values =", y.values)
                     y = self.quiz_df.loc[self.quiz_df.id == id2, self.quiz_df.columns.str.endswith('_score')].to_numpy().flatten()
                     if distance_type == 'euclid':
                         dist = distance.euclidean(x, y)
@@ -244,14 +246,9 @@ class PicaQuiz:
 
         mpl.style.use('seaborn')
         plt.figure(figsize=(16,16))
-        #mask = np.zeros_like(quiz_distances)
-        #mask[np.triu_indices_from(mask)] = True
-        #sbn.color_palette("crest", as_cmap=True)
         sbn.heatmap(
             self.dist_matrix,
-            #mask=mask,
             square=True,
-            #cmap='OrRd',
             cmap="YlGnBu",
             linewidth=0.5,
             annot=True,
@@ -259,8 +256,8 @@ class PicaQuiz:
         )
         plt.tight_layout()
         plt.rc('font', size=9)
-        plt.savefig(self.config.file_prefix + str(self.canvas_quiz.id) + "_" + \
-                    datetime.datetime.today().strftime('%Y%m%d') + "_dist_" + distance_type + ".png", dpi=200)#, bbox_inches='tight')
+        plt.savefig(self.config.file_prefix + str(self.canvas_quiz.id) + "_" +
+                    datetime.datetime.today().strftime('%Y%m%d') + "_dist_" + distance_type + ".png", dpi=200)
 
         if show_plot:
             plt.show()
