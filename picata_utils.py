@@ -52,7 +52,7 @@ def selectCourse(canvas):
     return canvas.get_course(valid_courses[str_index].id)
 
 
-def sendMessage():
+def sendMessage(pica_course, pairs):
     # Message template to be sent to student pairs in Canvas. The user should be
     # able to customize this message each time the program is run, rather than it
     # being hard-coded here. One option is to prompt the user to input the message
@@ -75,7 +75,7 @@ def sendMessage():
         num_students = len(pair) - 1
         recipient_canvas_ids = [str(id) for id in pair[0:-1]]
         print("recipients =", recipient_canvas_ids)
-        names = [chosen_course.get_user(id).name.split()[0] for id in pair[0:-1]]
+        names = [pica_course.canvas_course.get_user(id).name.split()[0] for id in pair[0:-1]]
         names.sort()
         print("names =", names)
         names_str = ", ".join(names)
@@ -84,8 +84,6 @@ def sendMessage():
         print(message_str)
         #convo = canvas.create_conversation(recipient_canvas_ids, message_str, subject=subject_str)
 
-
-
     # Send a test message (i.e. a Canvas Conversation) to M and S (June 30, 2021)
     #recipients = [str(31078), str(42374)]
     #num_students = 2
@@ -93,14 +91,15 @@ def sendMessage():
     #names_str = ", ".join(names)
     #message_str = message_template.format(names_str, message_dict1[num_students], question_text)
     #convo = canvas.create_conversation(recipients, message_str, subject=subject_str)
-
     #convo = canvas.create_conversation(recipients, message, subject="test message")
     # note: create_convo returns a list, so here convo[0] is the Conversation object
     return None
 
+
 class PicaCourse:
 
     def __init__(self, canvas_course, config, verbose=False):
+        self.canvas_course = canvas_course
         self.students = []
         enrollments = canvas_course.get_enrollments()
         student = None
