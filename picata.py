@@ -132,7 +132,7 @@ for q in quiz_question_ids:
         'var' : df[score_col].var(),
         'n_zeros' : sum(df[score_col] == 0.0),
         'n_ones' : sum(df[score_col] == 1.0),
-        'zeros_to_ones' : sum(df[score_col] == 0.0)/sum(df[score_col] == 1.0),
+        'zeros_to_ones' : (sum(df[score_col] == 0.0)/sum(df[score_col] == 1.0)) if sum(df[score_col] == 1.0) > 0 else None,
         'entropy' : stats.entropy(df[score_col])
     }
 
