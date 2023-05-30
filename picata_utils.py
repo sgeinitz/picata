@@ -93,23 +93,19 @@ def sendMessage(canvas, pica_course, pairs):
 class PicaCourse:
 
     def __init__(self, canvas_course, config, verbose=False):
+        """ Retrieve the selected course and get list of all students. """
         self.canvas_course = canvas_course
         self.students = []
         enrollments = canvas_course.get_enrollments()
         student = None
         for i, student in enumerate(enrollments):
+            # Use print(f"dir(student): {dir(student)}") to see all attributes
             if student.role == 'StudentEnrollment' and student.enrollment_state == 'active' and student.sis_user_id != None:
                 student.user['total_activity_time'] = student.total_activity_time
                 student.user['last_activity_at'] = student.last_activity_at
                 self.students.append(student.user)
-            #print(f"[ {i:2d} ] {student}")    
-            #print(f"  student.role = {student.role}")
-            #print(f"  student.user = {student.user}")
-            #print(f"  student.enrollment_state = {student.enrollment_state}")
-            #print(f"  student.last_activity_at = {student.last_activity_at}")
-            #print(f"  student.type = {student.type}")
-        #print(f"dir(student): {dir(student)}")
-        #print(self.students)
+        if verbose:
+            print(self.students)
 
 
 class PicaQuiz:
@@ -124,17 +120,13 @@ class PicaQuiz:
         self.n_students = None
         self.question_stats = None
         self.dist_matrix = None
-        self.quiz_questions = []
-        # quiz_questions is a list of all quiz questions (rather than retrieving questions
-        # from a SubmissionEvent object). This will be used later on when sending messages 
-        # to students about a specific question (e.g. quiz_question[k].question_text). 
+        self.quiz_questions = [] # Can later get text for kth question using quiz_question[k].question_text 
         for i, quest in enumerate(canvas_quiz.get_questions()):
             self.quiz_questions.append(quest)
             if verbose:
                 print(f"Question {i}: {quest}")
         self.quiz_question_ids = [str(c.id) for c in self.quiz_questions]
         self.getQuizData(verbose=verbose)
-
 
     def getQuizData(self, verbose=False):
         """ Download student_analysis csv quiz report. """
@@ -193,7 +185,6 @@ class PicaQuiz:
             for key, val in self.question_stats.items():
                 print("key =", key, "->", val)
 
-
     def generateQuestionHistograms(self, show_plot=True, verbose=False):
         """ Draw a histogram of scores of each question. """
         mpl.style.use('seaborn')
@@ -213,7 +204,6 @@ class PicaQuiz:
 
         if show_plot:
             plt.show()
-
 
     def generateDistanceMatrix(self, show_plot=True, verbose=False, distance_type='euclid'):
         """ Calculate vector distance between all possible student pairs. """
@@ -240,7 +230,7 @@ class PicaQuiz:
                     self.dist_matrix[id2][id1] = dist
 
         mpl.style.use('seaborn')
-        plt.figure(figsize=(16,16))
+        plt.figure(figsize=(16, 16))
         sbn.heatmap(
             self.dist_matrix,
             square=True,
@@ -251,7 +241,7 @@ class PicaQuiz:
         )
         plt.tight_layout()
         plt.rc('font', size=9)
-        plt.savefig(self.config.file_prefix + str(self.canvas_quiz.id) + "_" +
+        plt.savefig(self.config.file_prefix + str(self.canvas_quiz.id) + "_" + \
                     datetime.datetime.today().strftime('%Y%m%d') + "_dist_" + distance_type + ".png", dpi=200)
 
         if show_plot:
