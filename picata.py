@@ -1,20 +1,10 @@
 import canvasapi
 import os
-#import requests
-#import scipy.stats as stats
-#import scipy.spatial.distance as distance
-#import pandas as pd
-#import numpy as np
-#import matplotlib.pyplot as plt
-#import matplotlib as mpl
-#import seaborn as sbn
-#import datetime
-#import time
 import picata_utils as pu
 import picata_config as pc
 
 # User/instructor must first have created and downloaded a token in Canvas, and
-# set up environment vars appropriately (e.g. 'source <file w/ canvas info>'). 
+# set up environment vars appropriately (e.g. 'source <file w/ canvas info>').
 API_URL = os.environ.get("CANVAS_URL")
 API_KEY = os.environ.get("CANVAS_TOKEN")
 if not (API_URL or API_KEY):
@@ -37,7 +27,7 @@ pica_course = pu.PicaCourse(chosen_course, pica_config, verbose=True)
 chosen_quiz = pu.selectFromList(chosen_course.get_quizzes(), "quiz")
 print(f"\nSelected quiz: {chosen_quiz.title}")
 
-# Obtain quiz data 
+# Obtain quiz data
 pica_quiz = pu.PicaQuiz(canvas, chosen_quiz, pica_config, verbose=True)
 pica_quiz.generateQuestionHistograms()
 pica_quiz.generateDistanceMatrix()
