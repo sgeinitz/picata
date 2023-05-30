@@ -232,9 +232,9 @@ class PicaQuiz:
                 print(id1, "values =", x.values)
             for j, id2 in enumerate(student_ids):
                 if i < j:
+                    y = self.quiz_df.loc[self.quiz_df.id == id2, self.quiz_df.columns.str.endswith('_score')].to_numpy().flatten()
                     if verbose:
                         print(id2, "values =", y.values)
-                    y = self.quiz_df.loc[self.quiz_df.id == id2, self.quiz_df.columns.str.endswith('_score')].to_numpy().flatten()
                     if distance_type == 'euclid':
                         dist = distance.euclidean(x, y)
                     elif distance_type == 'cosine':
