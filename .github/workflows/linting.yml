@@ -1,0 +1,23 @@
+name: Python linting
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.x
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.x'
+    - name: Install dependencies
+      run: |
+        pip install flake8
+        pip install flake8-docstrings
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 $(git ls-files '*.py') --count --select=E9,F63,F7,F82 --show-source --statistics
+        # check that there are docstrings and that line width does not exceed reasonable limit (gh editor limit is 127 chars)
+        flake8 $(git ls-files '*.py') --count --max-complexity=10 --max-line-length=127 --ignore=D205,D210,D400,D401,E111 --statistics
