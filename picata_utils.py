@@ -51,7 +51,7 @@ def selectCourse(canvas):
     return canvas.get_course(valid_courses[str_index].id)
 
 
-def sendMessage(pica_course, pairs):
+def sendMessage(canvas, pica_course, pairs):
     """
     Message template to be sent to student pairs in Canvas. The user should be
     able to customize this message each time the program is run, rather than it
