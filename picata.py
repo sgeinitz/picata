@@ -30,7 +30,7 @@ canvas = canvasapi.Canvas(API_URL, API_KEY)
 chosen_course = pu.selectFromList(canvas.get_courses(), "course")
 print(f"\nSelected course: {chosen_course.name}")
 
-pica_course = pu.PicaCourse(canvas, chosen_course, pica_config, verbose=True)
+pica_course = pu.PicaCourse(chosen_course, pica_config, verbose=True)
 
 
 # Prompt user to select a quiz

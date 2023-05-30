@@ -1,16 +1,15 @@
-import canvasapi
-import os
+import datetime
 import requests
-import scipy.stats as stats
-import scipy.spatial.distance as distance
+import time
+import os
 import pandas as pd
 import numpy as np
+import scipy.stats as stats
+import scipy.spatial.distance as distance
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import seaborn as sbn
-import datetime
-import time
-#import picata_config as pc
+import canvasapi
 
 def selectFromList(paginated_list, item_type="item"):
     """ 
@@ -101,7 +100,7 @@ def sendMessage():
 
 class PicaCourse:
 
-    def __init__(self, canvas, canvas_course, config, verbose=False):
+    def __init__(self, canvas_course, config, verbose=False):
         self.students = []
         enrollments = canvas_course.get_enrollments()
         student = None
@@ -161,13 +160,15 @@ class PicaQuiz:
         quiz_report = self.canvas_quiz.get_quiz_report(quiz_report_request)
         quiz_csv_url = quiz_report.file['url']
         quiz_csv = requests.get(quiz_csv_url)
-        csv = open(self.config.file_prefix + 'quiz_' + str(self.canvas_quiz.id)  +'_student_analysis.csv', 'wb') 
+        csv_name = self.config.file_prefix + str(self.canvas_quiz.id)  + "_" + \
+                                   datetime.datetime.today().strftime('%Y%m%d') + "_student_analysis.csv"
+        csv = open(csv_name, 'wb') 
         for content in quiz_csv.iter_content(chunk_size=2^20):
             if content:
                 csv.write(content)
         csv.close()
 
-        self.quiz_df = pd.read_csv(self.config.file_prefix + 'quiz_' + str(self.canvas_quiz.id)  +'_student_analysis.csv')
+        self.quiz_df = pd.read_csv(csv_name)
 
         # rename columns to be shorter, cleaner, and with question_id as a column
         for old_col_name in self.quiz_df.columns:
@@ -214,13 +215,14 @@ class PicaQuiz:
         axis[0].set_ylabel('# of people')
         #plt.subplots_adjust(left=0.05, right=0.98, bottom=0.15, top=0.9)
         plt.tight_layout()
-        figure.savefig(self.config.file_prefix + 'quiz_' + str(self.canvas_quiz.id) + "_" + datetime.datetime.today().strftime('%Y%m%d') + ".png", dpi=200)
+        figure.savefig(self.config.file_prefix + str(self.canvas_quiz.id) + "_" + \
+                       datetime.datetime.today().strftime('%Y%m%d') + "_histograms.png", dpi=200)
 
         if show_plot:
             plt.show()
 
 
-    def generateDistanceMatrix(self, show_plot=True, verbose=False, distance_type='euclidean'):
+    def generateDistanceMatrix(self, show_plot=True, verbose=False, distance_type='euclid'):
         """ Calculate vector distance between all possible student pairs. """
         student_ids = list(self.quiz_df['id'])
         student_ids.sort()
@@ -233,7 +235,7 @@ class PicaQuiz:
                 if i < j:
                     #print(id2, "values =", y.values)
                     y = self.quiz_df.loc[self.quiz_df.id == id2, self.quiz_df.columns.str.endswith('_score')].to_numpy().flatten()
-                    if distance_type == 'euclidean':
+                    if distance_type == 'euclid':
                         dist = distance.euclidean(x, y)
                     elif distance_type == 'cosine':
                         dist = distance.cosine(x, y)
@@ -259,8 +261,8 @@ class PicaQuiz:
         )
         plt.tight_layout()
         plt.rc('font', size=9)
-        plt.savefig(self.config.file_prefix + 'quiz_' + str(self.canvas_quiz.id) + "_" + \
-                    datetime.datetime.today().strftime('%Y%m%d') + "_dist_euclid.png", dpi=200)#, bbox_inches='tight')
+        plt.savefig(self.config.file_prefix + str(self.canvas_quiz.id) + "_" + \
+                    datetime.datetime.today().strftime('%Y%m%d') + "_dist_" + distance_type + ".png", dpi=200)#, bbox_inches='tight')
 
         if show_plot:
             plt.show()
