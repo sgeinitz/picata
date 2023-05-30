@@ -110,8 +110,9 @@ class PicaCourse:
 
 class PicaQuiz:
     """ A class for one quiz and associated attributes/data. """
-    
+
     def __init__(self, canvas, canvas_quiz, config, verbose=False):
+        """ Initialize quiz object by getting all quiz data from Canvas. """
         self.canvas = canvas
         self.canvas_quiz = canvas_quiz
         self.verbose = verbose
@@ -120,7 +121,7 @@ class PicaQuiz:
         self.n_students = None
         self.question_stats = None
         self.dist_matrix = None
-        self.quiz_questions = [] # Can later get text for kth question using quiz_question[k].question_text 
+        self.quiz_questions = []  # Can later get text for kth question using quiz_question[k].question_text
         for i, quest in enumerate(canvas_quiz.get_questions()):
             self.quiz_questions.append(quest)
             if verbose:
@@ -192,14 +193,12 @@ class PicaQuiz:
         figure.set_size_inches(13, 3)
         for i, q in enumerate(self.quiz_question_ids):
             score_col = q + '_score'
-            #print("i =", i, ", q =", q, ", sum of col =", df[score_col].sum())
             axis[i].hist(self.quiz_df[score_col], bins=6, facecolor='#00447c', edgecolor='black', alpha=0.8)
             axis[i].set_xlabel('score')
             axis[i].set_title('question: ' + q.split('_')[0])
         axis[0].set_ylabel('# of people')
-        #plt.subplots_adjust(left=0.05, right=0.98, bottom=0.15, top=0.9)
-        plt.tight_layout()
-        figure.savefig(self.config.file_prefix + str(self.canvas_quiz.id) + "_" +
+        plt.tight_layout()  # Or try plt.subplots_adjust(left=0.05, right=0.98, bottom=0.15, top=0.9)
+        figure.savefig(self.config.file_prefix + str(self.canvas_quiz.id) + "_" + 
                        datetime.datetime.today().strftime('%Y%m%d') + "_histograms.png", dpi=200)
 
         if show_plot:
@@ -241,7 +240,7 @@ class PicaQuiz:
         )
         plt.tight_layout()
         plt.rc('font', size=9)
-        plt.savefig(self.config.file_prefix + str(self.canvas_quiz.id) + "_" + \
+        plt.savefig(self.config.file_prefix + str(self.canvas_quiz.id) + "_" + 
                     datetime.datetime.today().strftime('%Y%m%d') + "_dist_" + distance_type + ".png", dpi=200)
 
         if show_plot:
