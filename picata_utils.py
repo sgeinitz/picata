@@ -147,11 +147,11 @@ class PicaQuiz:
         quiz_report = self.canvas_quiz.get_quiz_report(quiz_report_request)
         quiz_csv_url = quiz_report.file['url']
         quiz_csv = requests.get(quiz_csv_url)
-        csv_name = self.config.file_prefix + str(self.canvas_quiz.id)  + "_" + \
+        csv_name = self.config.file_prefix + str(self.canvas_quiz.id) + "_" + \
             datetime.datetime.today().strftime('%Y%m%d') + "_student_analysis.csv"
 
         csv = open(csv_name, 'wb')
-        for content in quiz_csv.iter_content(chunk_size = 2^20):
+        for content in quiz_csv.iter_content(chunk_size=2**20):
             if content:
                 csv.write(content)
         csv.close()
@@ -163,9 +163,9 @@ class PicaQuiz:
             new_col_name = old_col_name.split(':')[0].replace(' ', '_').replace('.', '_')
             self.quiz_df.rename(columns={old_col_name: new_col_name}, inplace=True)
 
-        for i,col in enumerate(self.quiz_df.columns):
+        for i, col in enumerate(self.quiz_df.columns):
             if col in self.quiz_question_ids:
-                next_col = self.quiz_df.columns[i+1]
+                next_col = self.quiz_df.columns[i + 1]
                 next_col_new_name = col + '_score'
                 self.quiz_df.rename(columns={next_col: next_col_new_name}, inplace=True)
                 self.quiz_df[next_col_new_name].apply(pd.to_numeric)
@@ -200,7 +200,7 @@ class PicaQuiz:
             axis[i].set_title('question: ' + q.split('_')[0])
         axis[0].set_ylabel('# of people')
         plt.tight_layout()  # Or try plt.subplots_adjust(left=0.05, right=0.98, bottom=0.15, top=0.9)
-        figure.savefig(self.config.file_prefix + str(self.canvas_quiz.id) + "_" + \
+        figure.savefig(self.config.file_prefix + str(self.canvas_quiz.id) + "_" +
                        datetime.datetime.today().strftime('%Y%m%d') + "_histograms.png", dpi=200)
 
         if show_plot:
@@ -242,7 +242,7 @@ class PicaQuiz:
         )
         plt.tight_layout()
         plt.rc('font', size=9)
-        plt.savefig(self.config.file_prefix + str(self.canvas_quiz.id) + "_" + \
+        plt.savefig(self.config.file_prefix + str(self.canvas_quiz.id) + "_" +
                     datetime.datetime.today().strftime('%Y%m%d') + "_dist_" + distance_type + ".png", dpi=200)
 
         if show_plot:
