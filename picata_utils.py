@@ -200,7 +200,7 @@ class PicaQuiz:
             axis[i].set_title('question: ' + q.split('_')[0])
         axis[0].set_ylabel('# of people')
         plt.tight_layout()  # Or try plt.subplots_adjust(left=0.05, right=0.98, bottom=0.15, top=0.9)
-        figure.savefig(self.config.file_prefix + str(self.canvas_quiz.id) + "_" +
+        figure.savefig(self.config.file_prefix + str(self.canvas_quiz.id) + "_" + 
                        datetime.datetime.today().strftime('%Y%m%d') + "_histograms.png", dpi=200)
 
         if show_plot:
@@ -242,7 +242,7 @@ class PicaQuiz:
         )
         plt.tight_layout()
         plt.rc('font', size=9)
-        plt.savefig(self.config.file_prefix + str(self.canvas_quiz.id) + "_" +
+        plt.savefig(self.config.file_prefix + str(self.canvas_quiz.id) + "_" + 
                     datetime.datetime.today().strftime('%Y%m%d') + "_dist_" + distance_type + ".png", dpi=200)
 
         if show_plot:
