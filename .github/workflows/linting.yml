@@ -15,9 +15,10 @@ jobs:
         python-version: '3.x'
     - name: Install dependencies
       run: |
+        pip install --upgrade pip
         pip install flake8
         pip install flake8-docstrings
-        # stop the build if there are Python syntax errors or undefined names
+        # stop if there are Python syntax errors or undefined names
         flake8 $(git ls-files '*.py') --count --select=E9,F63,F7,F82 --show-source --statistics
-        # check that there are docstrings and that line width does not exceed reasonable limit (gh editor limit is 127 chars)
+        # check there are docstrings and that line width does not exceed reasonable limit
         flake8 $(git ls-files '*.py') --count --max-complexity=12 --max-line-length=160 --ignore=D100,D205,D210,D400,D401,E111 --statistics

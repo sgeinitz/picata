@@ -87,10 +87,11 @@ def sendMessage(canvas, pica_course, pairs):
         # Create_convo returns a list, so here convo[0] is the conversation object
         convo = canvas.create_conversation(recipient_canvas_ids, message_str, subject=subject_str)
 
-    return None
+    return convo
 
 
 class PicaCourse:
+    """ A general class for a course and associated attributes/data. """
 
     def __init__(self, canvas_course, config, verbose=False):
         """ Retrieve the selected course and get list of all students. """
@@ -100,7 +101,7 @@ class PicaCourse:
         student = None
         for i, student in enumerate(enrollments):
             # Use print(f"dir(student): {dir(student)}") to see all attributes
-            if student.role == 'StudentEnrollment' and student.enrollment_state == 'active' and student.sis_user_id != None:
+            if student.role == 'StudentEnrollment' and student.enrollment_state == 'active' and student.sis_user_id is not None:
                 student.user['total_activity_time'] = student.total_activity_time
                 student.user['last_activity_at'] = student.last_activity_at
                 self.students.append(student.user)
@@ -136,7 +137,7 @@ class PicaQuiz:
         if verbose:
             print("type(quiz_report_request) = ", type(quiz_report_request))
             print("quiz_report_request.__dict__ = ", quiz_report_request.__dict__)
-        
+
         quiz_report_progress = self.canvas.get_progress(request_id)
         while quiz_report_progress.workflow_state != 'completed':
             print(f"\nQuiz report progress: {quiz_report_progress.completion}% completed")
@@ -147,9 +148,10 @@ class PicaQuiz:
         quiz_csv_url = quiz_report.file['url']
         quiz_csv = requests.get(quiz_csv_url)
         csv_name = self.config.file_prefix + str(self.canvas_quiz.id)  + "_" + \
-                                   datetime.datetime.today().strftime('%Y%m%d') + "_student_analysis.csv"
-        csv = open(csv_name, 'wb') 
-        for content in quiz_csv.iter_content(chunk_size=2^20):
+            datetime.datetime.today().strftime('%Y%m%d') + "_student_analysis.csv"
+
+        csv = open(csv_name, 'wb')
+        for content in quiz_csv.iter_content(chunk_size = 2^20):
             if content:
                 csv.write(content)
         csv.close()
@@ -198,7 +200,7 @@ class PicaQuiz:
             axis[i].set_title('question: ' + q.split('_')[0])
         axis[0].set_ylabel('# of people')
         plt.tight_layout()  # Or try plt.subplots_adjust(left=0.05, right=0.98, bottom=0.15, top=0.9)
-        figure.savefig(self.config.file_prefix + str(self.canvas_quiz.id) + "_" + 
+        figure.savefig(self.config.file_prefix + str(self.canvas_quiz.id) + "_" + \
                        datetime.datetime.today().strftime('%Y%m%d') + "_histograms.png", dpi=200)
 
         if show_plot:
@@ -240,7 +242,7 @@ class PicaQuiz:
         )
         plt.tight_layout()
         plt.rc('font', size=9)
-        plt.savefig(self.config.file_prefix + str(self.canvas_quiz.id) + "_" + 
+        plt.savefig(self.config.file_prefix + str(self.canvas_quiz.id) + "_" + \
                     datetime.datetime.today().strftime('%Y%m%d') + "_dist_" + distance_type + ".png", dpi=200)
 
         if show_plot:
