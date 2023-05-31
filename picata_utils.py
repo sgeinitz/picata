@@ -140,7 +140,7 @@ class PicaQuiz:
 
         quiz_report_progress = self.canvas.get_progress(request_id)
         while quiz_report_progress.workflow_state != 'completed':
-            print(f"\nQuiz report progress: {quiz_report_progress.completion}% completed")
+            print(f"  report progress: {quiz_report_progress.completion}% completed")
             time.sleep(0.5)
             quiz_report_progress = self.canvas.get_progress(request_id)
 
