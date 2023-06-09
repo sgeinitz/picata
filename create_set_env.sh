@@ -1,19 +1,30 @@
 # !/bin/bash
 
-# This is not used now but in the future should be run during installation/setup
-# of picata. When doing so, it should check to see whether a set_env.sh file
-# exists. If it does not, then it should create it by prompting the user for
-# their canvas url and token, and then populate the appropriate env vars in the
-# newly created set_env.sh file. From that point on the user won't need this
-# script any longer and they will only need to call the set_env.sh script (which
-# is also in .gitignore in order to ensure tokens are not uploaded to github).
+# Create the file, set_env.sh, so that the Canvas URL and token can be set as
+# environment variables.
+# Once set_env.sh has been created, this
+# script will not be needed any longer. Instead, when opening a terminal for the first, only 'source ./set_env.sh' will need to be called.
 
-# check if set_env.sh exists...
+SETENV="set_env.sh"
 
-# if it does not:
-echo "Creating script: set_env.sh"
+if [[ -e "$SETENV" ]]; then
+  echo "set_env.sh already exists (delete it if you wish to create it again, or modify it directly)"
+  exit
+fi
 
-# if it does, then don't do anything (or print the current url and token to see
-# if the user wants to change them)
+echo " ========== Creating configuration script: $SETENV ========== "
 
+echo "Enter the URL of your Canvas LMS (oftentimes this is of the form, your_institution_name.instructure.com):"
+read LMSURL
 
+echo "Enter or paste your Canvas LMS access token here (be careful not to share this with anyone else):"
+read TOKEN
+
+echo "#!/bin/bash" > "$SETENV"
+echo "export CANVAS_URL=\"$LMSURL\"" >> "$SETENV"
+echo "export CANVAS_TOKEN=\"$TOKEN\"" >> "$SETENV"
+
+# Set the execute permission for the configuration script
+chmod +x "$SETENV"
+
+echo " =========== Configuration script $SETENV created =========== "
