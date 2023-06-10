@@ -27,4 +27,22 @@ echo "export CANVAS_TOKEN=\"$TOKEN\"" >> "$SETENV"
 # Set the execute permission for the configuration script
 chmod +x "$SETENV"
 
-echo " =========== Configuration script $SETENV created =========== "
+
+DATA="data"
+EXCSV="present_example.csv"
+FIGS="figures"
+
+echo "\n =========== Creating subdirectories: $DATA, $FIGS =========== "
+
+mkdir -p $DATA $FIGS
+
+# Create the sample .csv file with specific column names in the data/ subdirectory
+echo "last_name_first_name,name,id,sis_id,email,present" > $DATA/$EXCSV
+echo "\"Doe, Jane\",Jane Doe,12345,987654321,john@institution.edu,1 " >> $DATA/$EXCSV
+echo "\"Doe, John\",John Doe,12346,987654322,jane@institution.edu,1 " >> $DATA/$EXCSV
+echo "\"Doe, Jim\",Jim Doe,12347,987654323,jim@institution.edu,0 " >> $DATA/$EXCSV
+
+
+
+
+
