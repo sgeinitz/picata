@@ -31,9 +31,10 @@ navigate to _'Account'_, then _'Settings'_. Towards the bottom of this screen
 in your LMS you will see a blue button that says, _'+ New Access Token_'. You will copy/download this token to your
 local system, but be careful not to share it (e.g. do not save it a shared directory). 
 3. Once it is cloned, open a command line terminal and navigate  to the __picata__ directory (using
-'[cd](https://en.wikipedia.org/wiki/Cd_(command))'). You will then run configuration setup script by simply typing, `./create_set_env.sh` at the terminal prompt.  
-This will prompt you for your institution's LMS base URL as well as the token you created in the previous step. 
-Once this is complete, double check that the configuration script, _set_env.sh_ has been created, and that it has the correct values for your URL and token.
+'[cd](https://en.wikipedia.org/wiki/Cd_(command))'). You will then run configuration setup script by simply typing, `./configure.sh` at the terminal prompt.  
+This will prompt you for your institution's LMS base URL as well as the token you created in the previous step and create the _data/_ and _figures/_ subdirectories.
+Once this is complete, double check that the configuration script, _set_env.sh_ has been created, that it has the correct values for your URL and token, and that the
+subdirectories have been created. 
 
 
 ### Usage
@@ -45,7 +46,7 @@ CA. This first workflow is the one that is currently implemented here in PICATA 
 2. Run the configuration script to set the environment variables by typing, `source set_env.sh`, at the terminal prompt. 
 3. Before running the picata script to create student pairs, you will first need to mark which students are physically present in the classroom. 
 This is the same class session in which students will take the collaborative quiz. You  mark which students are present in the classroom today by modifying the _'present_xxx.csv'_ file in the _data/_ directory. 
-See the example _'present.csv'_ file in the _data/_ directory and keep the same format (i.e. columns, column names, etc.). 
+See the example _'present_example.csv'_ file in the _data/_ directory and keep the same format (i.e. columns, column names, etc.). 
 5. Run the picata application by typing, `python picata.py`.  This will prompt you for the course, (independent) quiz to use for the pairing method, the exact filename of _'present_xxx.csv'_ file denoting 
 which students are present today, and the pairing method to be used. 
 6. Once the picata application has been run, open the _data/_ directory and look for a file that was just created with a name matching the pattern, _'quiz_xxx_pairing_via_xxx.csv'_. 

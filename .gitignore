@@ -4,14 +4,16 @@ __pycache__/
 *$py.class
 
 
-# any data/img files
+# any data figures and their directories
 *.csv
 *.pickle
 *.pkl
 *.png
+data/*
+figures/*
 
 # OSX files
 .DS_Store
 
-# file with personal tokens for canvas api
+# file with personal access tokens
 set_env.sh
