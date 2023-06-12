@@ -7,11 +7,10 @@ PICATA is a tool for instructors who wish to combine Peer Instruction (PI) and
 Continuous Assessments (CA) utilizing results from students' earlier CA data.
 For more information on the PICA method, see the paper located at .... 
 
-Currently, this terminal-based tool works with the Canvas Learning Management System (LMS)
-using the [CanvasAPI](https://github.com/ucfopen/canvasapi).  
-In addition to increased functionality, development plans for this project include extending it to other LMSs and
-creating a richer interface. Suggestions for the other functionality/features
-(see Issues), as well as any feedback on the project, are welcomed. 
+Currently, this terminal-based tool works with the Canvas Learning Management System (LMS) using the 
+[CanvasAPI](https://github.com/ucfopen/canvasapi). In addition to increased functionality, development 
+plans for this project include extending it to other LMSs and creating a richer interface. Suggestions 
+for other functionality/features (see Issues), as well as any feedback on the project, are welcomed. 
 
 
 ### Installation
