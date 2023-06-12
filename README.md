@@ -7,10 +7,9 @@ PICATA is a tool for instructors who wish to combine Peer Instruction (PI) and
 Continuous Assessments (CA) utilizing results from students' earlier CA data.
 For more information on the PICA method, see the paper located at .... 
 
-Currently, this tool works with the Canvas Learning Management System (LMS)
-primarily using the [CanvasAPI](https://github.com/ucfopen/canvasapi). The
-interface is console/terminal based.  In addition to increased functionality,
-the development plans for this project include extending it to other LMSs and
+Currently, this terminal-based tool works with the Canvas Learning Management System (LMS)
+using the [CanvasAPI](https://github.com/ucfopen/canvasapi).  
+In addition to increased functionality, development plans for this project include extending it to other LMSs and
 creating a richer interface. Suggestions for the other functionality/features
 (see Issues), as well as any feedback on the project, are welcomed. 
 
@@ -27,8 +26,8 @@ this repository to your local system. This can either be done
 in just one place on your local system, or separately for each course that it will be used in. The latter option 
 is our preferred method since we tend to have a separate directory for each course we teach, and prefer to keep the course data separate. 
 2. Open a web browser and go to your institution's Canvas LMS. You'll then
-navigate to _'Account'_, then _'Settings'_. Towards the bottom of this screen
-in your LMS you will see a blue button that says, _'+ New Access Token_'. You will copy/download this token to your
+navigate to _'Account'_, then _'Settings'_. Towards the bottom of this window
+in your LMS you will see a blue button, _'+ New Access Token_'. Click on this button to copy/download the token to your
 local system, but be careful not to share it (e.g. do not save it a shared directory). 
 3. Once it is cloned, open a command line terminal and navigate  to the __picata__ directory (using
 '[cd](https://en.wikipedia.org/wiki/Cd_(command))'). You will then run configuration setup script by simply typing, `./configure.sh` at the terminal prompt.  
