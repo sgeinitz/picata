@@ -143,7 +143,7 @@ class PicaQuiz:
         request_id = quiz_report_request.progress_url.split('/')[-1]
         if self.verbose:
             print("type(quiz_report_request) = ", type(quiz_report_request))
-            #print("quiz_report_request.__dict__ = ", quiz_report_request.__dict__)
+            print("quiz_report_request.__dict__ = ", quiz_report_request.__dict__)
 
         quiz_report_progress = self.canvas.get_progress(request_id)
         while quiz_report_progress.workflow_state != 'completed':
@@ -213,7 +213,6 @@ class PicaQuiz:
 
     def generateDistanceMatrix(self, only_present, distance_type='euclid'):
         """ Calculate vector distance between all possible student pairs. """
-
         quiz_df_local = self.df_quiz_scores_present.copy() if only_present else self.quiz_df.copy()
         student_ids = list(quiz_df_local['id'])
         student_ids.sort()
@@ -264,7 +263,8 @@ class PicaQuiz:
         present_csvs.sort()
         for i, f in enumerate(present_csvs):
             fstring = f"[ {i:2d} ] {f}" if len(present_csvs) > 10 else f"[ {i} ] {f}"
-            #print(f"  [ {i:2d} ] {f}")
+            if self.verbose:
+                print(f"  [ {i:2d} ] {f}")
             print(fstring)
 
         # Prompt user to select a file from the list above.
@@ -277,12 +277,14 @@ class PicaQuiz:
         self.df_present = df_present_all[df_present_all['present'] == 1]
         print(f"  *** (double check there are {len(self.df_present)} students present today) ***")
 
-        self.df_quiz_scores_present = pd.merge(self.df_present[['name', 'id']], self.quiz_df, how='left')#, on=['name','id']) 
-        self.df_quiz_scores_present.fillna(0, inplace=True) # replace missing values with zero (for people who missed the pre-quiz)
-        #print(f"self.df_quiz_scores_present.columns = {self.df_quiz_scores_present.columns}")
+        self.df_quiz_scores_present = pd.merge(self.df_present[['name', 'id']], self.quiz_df, how='left')  # on=['name','id']) 
+        self.df_quiz_scores_present.fillna(0, inplace=True)  # replace missing values with zero (for people who missed the pre-quiz)
+        if self.verbose:
+            print(f"self.df_quiz_scores_present.columns = {self.df_quiz_scores_present.columns}")
         assert len(self.df_quiz_scores_present) == len(self.df_present)
 
     def createStudentPairings(self, method='med', write_csv=True):
+        """ Generate student pairings using one of several methods, but not saved unless write_csv is True. """
         dm = self.dist_matrix.copy()
         pairings = []
 
@@ -291,15 +293,15 @@ class PicaQuiz:
             # retrieve max entry in each column/row and corresponding index
             # (note that indices and columns are canvas student ids)
             col_maximums = dm.max()
-            col_max_indices = dm.idxmax()  #for col in quiz_distances.columns]
+            col_max_indices = dm.idxmax()
 
             # 'max' is a greedy approach taking largest pair difference first
             if method == 'max':
                 person_A = col_maximums.idxmax()
-            # 'med' is median difference and generally leads to highest mean diff and lowest variance 
+            # 'med' is median difference and generally leads to highest mean diff and lowest variance
             elif method == 'med':
                 col_maximums.sort_values(inplace=True)
-                person_A = col_maximums.index[len(col_maximums)//2]
+                person_A = col_maximums.index[len(col_maximums) // 2]
             # 'min' uses conservative approach by taking min pair difference (among maxes) but often leads to high var
             elif method == 'min':
                 person_A = col_maximums.idxmin()
@@ -325,10 +327,10 @@ class PicaQuiz:
 
         # only two people left in dm so they must be paired together
         if dm.shape[0] == 2:
-            pairings.append((dm.index[0], dm.index[1], dm.iat[0,1]))
+            pairings.append((dm.index[0], dm.index[1], dm.iat[0, 1]))
         # only one person left in dm so add them to the last pair that was created and use max distance among the three 3c2 possible distances among them
         else:
-            assert dm.shape == (1,1)
+            assert dm.shape == (1, 1)
             temp_tuple = pairings[-1]
             pairings[-1] = (temp_tuple[0], temp_tuple[1], dm.index[0],
                             max(temp_tuple[2], self.dist_matrix.loc[temp_tuple[0], dm.index[0]], self.dist_matrix.loc[temp_tuple[1], dm.index[0]]))
@@ -337,9 +339,9 @@ class PicaQuiz:
             print("Pairings:")
             print(pairings)
 
-        stats_tmp = [ x[-1] for x in pairings ]
+        stats_tmp = [x[-1] for x in pairings]
         mean_pair_dist = sum(stats_tmp) / len(stats_tmp)
-        var_pair_dist = sum([ (x[-1] - mean_pair_dist)**2 for x in pairings ]) / len(stats_tmp)
+        var_pair_dist = sum([(x[-1] - mean_pair_dist)**2 for x in pairings]) / len(stats_tmp)
 
         if self.verbose:
             print(f"Pairing via {method} method:")
@@ -356,18 +358,15 @@ class PicaQuiz:
         pairs_max = self.createStudentPairings(method='max', write_csv=False)
         pairs_min = self.createStudentPairings(method='min', write_csv=False)
         pairs_rand = self.createStudentPairings(method='rand', write_csv=False)
-        pairs_med_distances = pd.Series([ x[-1] for x in pairs_med ])
-        pairs_max_distances = pd.Series([ x[-1] for x in pairs_max ])
-        pairs_min_distances = pd.Series([ x[-1] for x in pairs_min ])
-        pairs_rand_distances = pd.Series([ x[-1] for x in pairs_rand ])
+        pairs_med_distances = pd.Series([x[-1] for x in pairs_med])
+        pairs_max_distances = pd.Series([x[-1] for x in pairs_max])
+        pairs_min_distances = pd.Series([x[-1] for x in pairs_min])
+        pairs_rand_distances = pd.Series([x[-1] for x in pairs_rand])
 
         plt.figure(edgecolor='black')
         fig, axes = plt.subplots(1, 4, figsize=(20, 4))
         fig.patch.set_facecolor('white')
-        bin_breaks = [x/2 for x in range(0, (8+1))]
-        #bin_breaks = [x/20 for x in range(0, 21)]
-        #bin_breaks = [0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
-        #md['rq1_pvalue'].hist(bins=bin_breaks, ax=axes[0], edgecolor='black')
+        bin_breaks = [x / 2 for x in range(0, (8 + 1))]
         pairs_med_distances.hist(bins=bin_breaks, ax=axes[0], edgecolor='black')
         pairs_max_distances.hist(bins=bin_breaks, ax=axes[1], edgecolor='black')
         pairs_min_distances.hist(bins=bin_breaks, ax=axes[2], edgecolor='black')
@@ -382,15 +381,13 @@ class PicaQuiz:
         axes[3].set_ylim(0, 9)
         axes[0].set_ylabel('# of Student Pairs')
         plt.tight_layout()
-        plt.savefig(self.config.figures_path + self.config.quiz_prefix + str(self.canvas_quiz.id) + 
+        plt.savefig(self.config.figures_path + self.config.quiz_prefix + str(self.canvas_quiz.id) +
                     "_compare_pairing_methods_" + datetime.datetime.today().strftime('%Y%m%d') + ".png", dpi=200)
         plt.close()
 
     def writePairingsCSV(self, method, pairs):
-
-        # list out names of students in pairings and save to a file
+        """ Create an output csv file in data/ with the given student pairings. """
         df = self.df_quiz_scores_present.copy()
-
         name1 = []
         name2 = []
         name3 = []
@@ -421,7 +418,9 @@ class PicaQuiz:
             if len(pair) == 3 + 1:
                 name3.append(df.name[df.id == pair[2]].to_string(index=False))
                 person3.append(pair[2])
-                # print(f"    3-tuple {i+1:2.0f}: {df.name[df.id == pair[0]].to_string(index=False)}, {df.name[df.id == pair[1]].to_string(index=False)}, {df.name[df.id == pair[2]].to_string(index=False)}")
+                if self.verbose:
+                    print(f"    3-tuple {i+1:2.0f}: {df.name[df.id == pair[0]].to_string(index=False)}, 
+                          {df.name[df.id == pair[1]].to_string(index=False)}, {df.name[df.id == pair[2]].to_string(index=False)}")
                 if self.verbose:
                     print(f"p1, p2, dist = {(pair[0], pair[1], self.dist_matrix.loc[pair[0], pair[1]])}")
                     print(f"p1, p3, dist = {(pair[0], pair[2], self.dist_matrix.loc[pair[0], pair[2]])}")
@@ -430,5 +429,5 @@ class PicaQuiz:
         df_pairs = pd.DataFrame({'person1': name1, 'person2': name2, 'person3': name3,
                                  'id1': person1, 'id2': person2, 'id3': person3, 'distance': [x[-1] for x in pairs]})
         pairs_csv = self.config.data_path + self.config.quiz_prefix + str(self.canvas_quiz.id) + \
-                    "_pairing_via_" + method + "_" + datetime.datetime.today().strftime('%Y%m%d') + ".csv"
+            "_pairing_via_" + method + "_" + datetime.datetime.today().strftime('%Y%m%d') + ".csv"
         df_pairs.to_csv(pairs_csv, index=False)
