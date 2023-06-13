@@ -26,7 +26,7 @@ pica_course = pu.PicaCourse(chosen_course, pica_config, verbose=False)
 chosen_quiz = pu.selectFromList(chosen_course.get_quizzes(), "quiz")
 print(f"\nSelected quiz: {chosen_quiz.title}\n\n")
 
-# Obtain quiz data and generate plots to visualize the data. 
+# Obtain quiz data and generate plots to visualize the data.
 pica_quiz = pu.PicaQuiz(canvas, chosen_quiz, pica_config, verbose=False)
 pica_quiz.generateQuestionHistograms()
 pica_quiz.generateDistanceMatrix(only_present=False)
