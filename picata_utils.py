@@ -419,7 +419,7 @@ class PicaQuiz:
                 name3.append(df.name[df.id == pair[2]].to_string(index=False))
                 person3.append(pair[2])
                 if self.verbose:
-                    print(f"    3-tuple {i+1:2.0f}: {df.name[df.id == pair[0]].to_string(index=False)}, 
+                    print(f"    3-tuple {i+1:2.0f}: {df.name[df.id == pair[0]].to_string(index=False)}, \
                           {df.name[df.id == pair[1]].to_string(index=False)}, {df.name[df.id == pair[2]].to_string(index=False)}")
                 if self.verbose:
                     print(f"p1, p2, dist = {(pair[0], pair[1], self.dist_matrix.loc[pair[0], pair[1]])}")
