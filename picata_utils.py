@@ -258,7 +258,6 @@ class PicaQuiz:
             csv_path = self.config.data_path
 
         # List all files in current directory that begin with the string: 'present_'.
-        #present_csvs = [f for f in os.listdir(csv_path) if os.path.isfile(f) and f.startswith('present')]
         present_csvs = [f for f in os.listdir(csv_path) if f.startswith('present')]
         present_csvs.sort()
         for i, f in enumerate(present_csvs):
@@ -277,7 +276,7 @@ class PicaQuiz:
         self.df_present = df_present_all[df_present_all['present'] == 1]
         print(f"  *** (double check there are {len(self.df_present)} students present today) ***")
 
-        self.df_quiz_scores_present = pd.merge(self.df_present[['name', 'id']], self.quiz_df, how='left')  # on=['name','id']) 
+        self.df_quiz_scores_present = pd.merge(self.df_present[['name', 'id']], self.quiz_df, how='left')  # on=['name','id'])
         self.df_quiz_scores_present.fillna(0, inplace=True)  # replace missing values with zero (for people who missed the pre-quiz)
         if self.verbose:
             print(f"self.df_quiz_scores_present.columns = {self.df_quiz_scores_present.columns}")
