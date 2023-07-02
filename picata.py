@@ -23,22 +23,24 @@ pica_course = pu.PicaCourse(chosen_course, pica_config, verbose=False)
 
 
 # Prompt user to select a quiz
-chosen_quiz = pu.selectFromList(chosen_course.get_quizzes(), "quiz")
-print(f"\nSelected quiz: {chosen_quiz.title}\n\n")
+chosen_discussion = pu.selectFromList(chosen_course.get_discussion_topics(), "discussion topic")
+print(f"\nSelected Discussion: {chosen_discussion.title}\n\n")
+
+pica_discussion = pu.PicaDiscussion(canvas, chosen_discussion, pica_config, verbose=False)
 
 # Obtain quiz data and generate plots to visualize the data.
-pica_quiz = pu.PicaQuiz(canvas, chosen_quiz, pica_config, verbose=False)
-pica_quiz.generateQuestionHistograms()
-pica_quiz.generateDistanceMatrix(only_present=False)
+#pica_quiz = pu.PicaQuiz(canvas, chosen_quiz, pica_config, verbose=False)
+#pica_quiz.generateQuestionHistograms()
+#pica_quiz.generateDistanceMatrix(only_present=False)
 
 # Prompt user for a task (either generate pairings, or check for bonus points, or ...).
 
 # Open the CSV file with student data for who is present today and recalculate distance matrix.
-pica_quiz.openPresentCSV()
-pica_quiz.generateDistanceMatrix(only_present=True)
+#pica_quiz.openPresentCSV()
+#pica_quiz.generateDistanceMatrix(only_present=True)
 
 # Compare all four methods of pairings students
-pica_quiz.comparePairingMethods()
+#pica_quiz.comparePairingMethods()
 
 # Generate pairings for today using the median method
-pica_quiz.createStudentPairings(method='med', write_csv=True)
+#pica_quiz.createStudentPairings(method='med', write_csv=True)

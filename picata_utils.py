@@ -1,5 +1,6 @@
 import datetime
 import os
+import re
 import random
 import requests
 import time
@@ -23,7 +24,7 @@ def selectFromList(paginated_list, item_type="item"):
         subobject_list.append(so)
     str_index = input(f"\nSelect {item_type} from above using index in square brackets: ")
 
-    if int(str_index) < 0 or int(str_index) >= i:
+    if int(str_index) < 0 or int(str_index) > i:
         raise IndexError("Invalid selection")
 
     return subobject_list[int(str_index)]
@@ -109,6 +110,66 @@ class PicaCourse:
                 self.students.append(student.user)
         if verbose:
             print(self.students)
+
+
+class PicaDiscussion:
+    """ A class for one quiz and associated attributes/data. """
+
+    def __init__(self, canvas, canvas_discussion, config, verbose=False):
+        """ Initialize quiz object by getting all quiz data from Canvas. """
+        self.canvas = canvas
+        self.canvas_discussion = canvas_discussion
+        self.verbose = verbose
+        self.config = config
+        self.config.disc_prefix = self.canvas_discussion.title.lower().replace(" ", "_") + "_"
+        self.discussion_df = None
+        self.n_entries = canvas_discussion.discussion_subentry_count
+        self.entries = []  # Can later get text for kth question using quiz_question[k].question_text
+
+        print(f"self.config.disc_prefix: {self.config.disc_prefix} \n")
+        print(f"dir(canvas_discussion): {dir(canvas_discussion)}")
+
+        print(f"canvas_discussion.discussion_type: {canvas_discussion.discussion_type}")
+        print(f"canvas_discussion.discussion_subentry_count: {canvas_discussion.discussion_subentry_count}")
+
+        #if self.verbose:
+        #    print(f"Quiz title: {self.canvas_quiz.title}")
+
+        #for i, quest in enumerate(canvas_quiz.get_questions()):
+        #    self.quiz_questions.append(quest)
+        #    if verbose:
+        #        print(f"Question {i}: {quest}")
+        #self.quiz_question_ids = [str(c.id) for c in self.quiz_questions]
+        self.getDiscussionEntries()
+
+    def getDiscussionEntries(self):
+        """ Retrieve all discussion entries. """
+        #quiz_report_request = self.canvas_quiz.create_report('student_analysis')
+        #request_id = quiz_report_request.progress_url.split('/')[-1]
+        entries = self.canvas_discussion.get_topic_entries()
+        
+        user_names = []
+        user_ids = []
+        user_posts = []
+        completed = []
+
+        print(f"type(entries[0]) = {type(entries[0])}\n")
+        print(f"entries[0].__dict__ = {entries[0].__dict__}\n")
+        print(f"dir(entries[0]) = {dir(entries[0])}\n\n")
+
+        for entry in entries:
+            #print(f"entry.message: {entry.message}")
+            user_names.append(entry.user_name)
+            user_ids.append(entry.user_id)
+            completed.append(entry.updated_at_date)
+            user_posts.append(re.sub('&nbsp;', ' ', re.sub('<[^>]*>', ' ', entry.message)))
+            #user_posts.append(re.sub('<[^>]*>', '', entry.message))
+        
+        self.discussion_df = pd.DataFrame({'id': user_ids, 'names': user_names, 'completed': completed,
+                                 'entry': user_posts})
+        discussion_csv = self.config.data_path + self.config.disc_prefix + str(self.canvas_discussion.id) + \
+            "_" + datetime.datetime.today().strftime('%Y%m%d') + ".csv"
+        self.discussion_df.to_csv(discussion_csv, index=False)
 
 
 class PicaQuiz:
