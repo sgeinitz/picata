@@ -233,8 +233,8 @@ class PicaQuiz:
                         dist = distance.cosine(x, y)
                     if dist == 0:
                         dist = 1E-4
-                    self.dist_matrix[id1][id2] = dist
-                    self.dist_matrix[id2][id1] = dist
+                    self.dist_matrix.loc[id1][id2] = dist
+                    self.dist_matrix.loc[id2][id1] = dist
 
         mpl.style.use('seaborn')
         plt.figure(figsize=(16, 16))
