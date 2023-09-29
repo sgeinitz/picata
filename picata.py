@@ -16,7 +16,10 @@ pica_config = pc.PicataConfig()
 canvas = canvasapi.Canvas(API_URL, API_KEY)
 
 # Prompt user to select a course
-chosen_course = pu.selectFromList(canvas.get_courses(), "course")
+#chosen_course = pu.selectFromList(canvas.get_courses(), "course")
+chosen_course = pu.selectCourse(canvas)
+
+
 print(f"\nSelected course: {chosen_course.name}\n\n")
 
 pica_course = pu.PicaCourse(chosen_course, pica_config, verbose=False)
