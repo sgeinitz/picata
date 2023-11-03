@@ -23,7 +23,7 @@ def selectFromList(paginated_list, item_type="item"):
         subobject_list.append(so)
     str_index = input(f"\nSelect {item_type} from above using index in square brackets: ")
 
-    if int(str_index) < 0 or int(str_index) >= i:
+    if int(str_index) < 0 or int(str_index) > i:
         raise IndexError("Invalid selection")
 
     return subobject_list[int(str_index)]
