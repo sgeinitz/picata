@@ -197,7 +197,7 @@ class PicaQuiz:
 
     def generateQuestionHistograms(self):
         """ Draw a histogram of scores of each question. """
-        mpl.style.use('seaborn')
+        mpl.style.use('seaborn-v0_8')
         figure, axis = plt.subplots(1, len(self.quiz_question_ids), sharey=True)
         figure.set_size_inches(13, 3)
         for i, q in enumerate(self.quiz_question_ids):
@@ -233,10 +233,11 @@ class PicaQuiz:
                         dist = distance.cosine(x, y)
                     if dist == 0:
                         dist = 1E-4
-                    self.dist_matrix.loc[id1][id2] = dist
-                    self.dist_matrix.loc[id2][id1] = dist
+                    #self.dist_matrix.loc[id1][id2] = dist # this won't work with pandas v3
+                    self.dist_matrix.loc[id1, id2] = dist
+                    self.dist_matrix.loc[id2, id1] = dist
 
-        mpl.style.use('seaborn')
+        mpl.style.use('seaborn-v0_8')
         plt.figure(figsize=(16, 16))
         sbn.heatmap(
             self.dist_matrix,
