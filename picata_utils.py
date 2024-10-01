@@ -1,4 +1,5 @@
 import datetime
+from datetime import datetime
 import os
 import random
 import requests
@@ -9,6 +10,7 @@ import scipy.spatial.distance as distance
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import seaborn as sbn
+import re
 
 
 def selectFromList(paginated_list, item_type="item"):
@@ -28,30 +30,70 @@ def selectFromList(paginated_list, item_type="item"):
 
     return subobject_list[int(str_index)]
 
-
 def selectCourse(canvas):
     """
     Given a canvas instance object, display a list of courses and prompt
     the user to select a course. The selected course is returned.
+
+    1. First prompt the user to choose between past or current courses.
+    2. List the selected type of courses (past or current).
     """
-    valid_courses = []
+
+    past_courses = []
+    current_courses = []
+    current_date = datetime.now()
+
+
     for course in canvas.get_courses():
         try:
-            # Exclude expired courses without names
-            course.name
-            valid_courses.append(course)
-        except Exception:
+            course_name = course.name
+
+            # Check start and end dates
+            start_date = datetime.strptime(course.start_at, '%Y-%m-%dT%H:%M:%SZ') if course.start_at else None
+            end_date = datetime.strptime(course.end_at, '%Y-%m-%dT%H:%M:%SZ') if course.end_at else None
+
+            # Separate past and current courses
+            if end_date and current_date > end_date:
+                past_courses.append(course)
+            elif not end_date or current_date <= end_date:
+                current_courses.append(course)
+
+        except Exception as e:
             pass
 
-    for i, course in enumerate(valid_courses):
-        print(f"[ {i:2d} ] {course.name}")
-    str_index = int(input("Select a course from the list above (using index in \'[]\'): "))
+    # Prompt user to select between past and current courses
+    print("\nSelect Course Type:")
+    print("[ 0 ] Past Courses")
+    print("[ 1 ] Current Courses")
+    selection = input("Select course type (using index in '[ ]'): ")
+    
+    if selection == "[0]":
+        print("\nPast Courses:")
+        for i, course in enumerate(past_courses):
+            print(f"[ {i:2d} ] {course.name}")
+        valid_courses = past_courses
+        
+    elif selection == "[1]":
+        print("\nCurrent Courses:")
+        for i, course in enumerate(current_courses):
+            print(f"[ {i:2d} ] {course.name}")
+        valid_courses = current_courses
+    else:
+        raise IndexError("Invalid selection format. Please select '[0]' for past or '[1]' for current.")
 
-    if int(str_index) < 0 or int(str_index) >= len(valid_courses):
-        raise IndexError("Invalid selection")
+    str_index = input("Select a course from the list above (using index in '[ ]'): ")
 
-    return canvas.get_course(valid_courses[str_index].id)
+    # Format
+    if not str_index.startswith("[") or not str_index.endswith("]"):
+        raise ValueError("Invalid selection format. Please use '[ ]' around the index.")
 
+    # Convert input into an integer
+    course_index = int(str_index[1:-1])
+
+    if course_index < 0 or course_index >= len(valid_courses):
+        raise IndexError("Invalid course selection.")
+
+    return canvas.get_course(valid_courses[course_index].id)
 
 def sendMessage(canvas, pica_course, pairs):
     """
