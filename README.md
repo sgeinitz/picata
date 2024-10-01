@@ -53,13 +53,11 @@ subdirectories have been created.
 4. **Verify Python Libraries**:
     Before running the project, ensure that all required Python libraries are installed:
     1. Install the required libraries using `pip`:
+    
     ```bash
     pip install -r requirements.txt 
     ```
-    or
-    ```bash
-    pip3 install -r requirements.txt
-    ```
+    
     2. Alternatively, you can install each library individually if needed.
 
         * ![canvasapi](https://img.shields.io/badge/canvasapi-2.2.0-blue)
