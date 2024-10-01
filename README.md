@@ -26,10 +26,10 @@ in just one place on your local system, or separately for each course that it wi
 
 2. **Generate a Canvas API Token**:
     Naviagte to the `picata` directory then run configuration setup script by simply typing, `./configure.sh` at the terminal prompt.
-  ```bash
+   ```bash
    cd picata
    ```
-     ```bash
+   ```bash
    ./configure.sh
    ```
    You will be prompted to enter:
