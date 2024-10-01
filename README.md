@@ -20,6 +20,10 @@ to use command line in a terminal. If necessary, there are many brief
 tutorials/lessons available to help in this area, e.g.,
 [freecodecamp.org](https://www.freecodecamp.org/news/command-line-for-beginners/).
 
+1. **Clone the repository**:
+  ```bash
+   ./configure.sh
+   ```
 1. The first step to using PICATA is to [clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) 
 this repository to your local system. This can either be done 
 in just one place on your local system, or separately for each course that it will be used in. The latter option 
