@@ -1,6 +1,5 @@
-import datetime
-from datetime import datetime
 import os
+import re
 import random
 import requests
 import time
@@ -10,14 +9,14 @@ import scipy.spatial.distance as distance
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import seaborn as sbn
-import re
-
+from datetime import datetime
 
 def selectFromList(paginated_list, item_type="item"):
     """
     A general function that takes a canvasapi paginated_list object
     and lists each item in it, then prompts user to select one item.
     """
+    print(f"\nOptions:")
     i = 0
     subobject_list = []
     for i, so in enumerate(paginated_list):
@@ -43,7 +42,6 @@ def selectCourse(canvas):
     current_courses = []
     current_date = datetime.now()
 
-
     for course in canvas.get_courses():
         try:
             course_name = course.name
@@ -59,36 +57,39 @@ def selectCourse(canvas):
                 current_courses.append(course)
 
         except Exception as e:
-            pass
+            print(f"Error: {e} - exiting")
+            sys.exit(1)
 
     # Prompt user to select between past and current courses
     print("\nSelect Course Type:")
     print("[ 0 ] Past Courses")
     print("[ 1 ] Current Courses")
-    selection = input("Select course type (using index in '[ ]'): ")
-    
-    if selection == "[0]":
+    selection = input("\nSelect course type (using index in '[ ]'): ")
+    selection = int(re.sub(r'\D', '', selection))
+
+    if selection == 0:
         print("\nPast Courses:")
         for i, course in enumerate(past_courses):
             print(f"[ {i:2d} ] {course.name}")
         valid_courses = past_courses
-        
-    elif selection == "[1]":
+
+    elif selection == 1:
         print("\nCurrent Courses:")
         for i, course in enumerate(current_courses):
             print(f"[ {i:2d} ] {course.name}")
         valid_courses = current_courses
     else:
-        raise IndexError("Invalid selection format. Please select '[0]' for past or '[1]' for current.")
+        raise IndexError("Invalid selection format. Please select '0' for past or '1' for current.")
 
-    str_index = input("Select a course from the list above (using index in '[ ]'): ")
+    str_index = input("\nSelect a course from the list above (using index in '[ ]'): ")
 
-    # Format
-    if not str_index.startswith("[") or not str_index.endswith("]"):
-        raise ValueError("Invalid selection format. Please use '[ ]' around the index.")
-
+    # if not str_index.startswith("[") or not str_index.endswith("]"):
+    #    raise ValueError("Invalid selection format. Please use '[ ]' around the index.")
     # Convert input into an integer
-    course_index = int(str_index[1:-1])
+    # course_index = int(str_index[1:-1])
+
+    # remove any characters that are not digits
+    course_index = int(re.sub(r'\D', '', str_index))
 
     if course_index < 0 or course_index >= len(valid_courses):
         raise IndexError("Invalid course selection.")
@@ -112,7 +113,7 @@ def sendMessage(canvas, pica_course, pairs):
     wait until class for more details. \n\nBest,\nSteve \n \nQuestion from previous quiz: {}"
 
     message_dict1 = {2: 'two', 3: 'three'}
-    subject_str = "Today's quiz review session - " + datetime.datetime.today().strftime('%Y.%m.%d')
+    subject_str = "Today's quiz review session - " + datetime.today().strftime('%Y.%m.%d')
     question_text = "A question from the quiz will be shown here."
 
     # Individual messages to be sent
@@ -141,9 +142,8 @@ class PicaCourse:
         """ Retrieve the selected course and get list of all students. """
         self.canvas_course = canvas_course
         self.students = []
-        enrollments = canvas_course.get_enrollments()
         student = None
-        for i, student in enumerate(enrollments):
+        for i, student in enumerate(self.canvas_course.get_enrollments()):
             # Use print(f"dir(student): {dir(student)}") to see all attributes
             if student.role == 'StudentEnrollment' and student.enrollment_state == 'active' and student.sis_user_id is not None:
                 student.user['total_activity_time'] = student.total_activity_time
@@ -152,6 +152,15 @@ class PicaCourse:
         if verbose:
             print(self.students)
 
+    def saveStudentActivity(self, data_path):
+        """ Save student activity data to a CSV file (unfortunately, trying to get more information
+        using, say, u = course.get_user(user=id), and then u.get_pages_views() is not allowed). """
+        acts = pd.DataFrame(columns=['name', 'id', 'total_activity_mins', 'last_activity_at'])
+        for s in self.students:
+            acts.loc[len(acts)] = [s['name'], s['id'], s['total_activity_time'] / 60.0, s['last_activity_at']]
+
+        activity_csv = data_path + "course_activity_" + datetime.today().strftime('%Y%m%d') + ".csv"
+        acts.to_csv(activity_csv, index=False)
 
 class PicaQuiz:
     """ A class for one quiz and associated attributes/data. """
@@ -197,7 +206,7 @@ class PicaQuiz:
         quiz_csv_url = quiz_report.file['url']
         quiz_csv = requests.get(quiz_csv_url)
         csv_name = self.config.data_path + self.config.quiz_prefix + str(self.canvas_quiz.id) + "_" + \
-            datetime.datetime.today().strftime('%Y%m%d') + "_student_analysis.csv"
+            datetime.today().strftime('%Y%m%d') + "_student_analysis.csv"
 
         csv = open(csv_name, 'wb')
         for content in quiz_csv.iter_content(chunk_size=2**20):
@@ -250,7 +259,7 @@ class PicaQuiz:
         axis[0].set_ylabel('# of people')
         plt.tight_layout()  # Or try plt.subplots_adjust(left=0.05, right=0.98, bottom=0.15, top=0.9)
         figure.savefig(self.config.figures_path + self.config.quiz_prefix + str(self.canvas_quiz.id) + "_" +
-                       datetime.datetime.today().strftime('%Y%m%d') + "_histograms.png", dpi=200)
+                       datetime.today().strftime('%Y%m%d') + "_histograms.png", dpi=200)
         plt.close('all')
 
     def generateDistanceMatrix(self, only_present, distance_type='euclid'):
@@ -292,7 +301,7 @@ class PicaQuiz:
         plt.tight_layout()
         plt.rc('font', size=9)
         plt.savefig(self.config.figures_path + self.config.quiz_prefix + str(self.canvas_quiz.id) + "_" +
-                    datetime.datetime.today().strftime('%Y%m%d') + "_dist_" + distance_type + ".png", dpi=200)
+                    datetime.today().strftime('%Y%m%d') + "_dist_" + distance_type + ".png", dpi=200)
         plt.close()
 
     def openPresentCSV(self, csv_path=None):
@@ -300,6 +309,7 @@ class PicaQuiz:
         if not csv_path:
             csv_path = self.config.data_path
 
+        print("\nCSV Options:")
         # List all files in current directory that begin with the string: 'present_'.
         present_csvs = [f for f in os.listdir(csv_path) if f.startswith('present')]
         present_csvs.sort()
@@ -324,6 +334,48 @@ class PicaQuiz:
         if self.verbose:
             print(f"self.df_quiz_scores_present.columns = {self.df_quiz_scores_present.columns}")
         assert len(self.df_quiz_scores_present) == len(self.df_present)
+
+    def getPastPairingsCSV(self, csv_path=None):
+
+        """ Prompt for a CSV that contains past pairings for this quiz and return a pandas dataframe. """
+        if not csv_path:
+            csv_path = self.config.data_path
+        print("\nCSV Options:")
+
+        # List all files in current directory that contain the string: 'pairing'.
+        pastpairs_csvs = [f for f in os.listdir(csv_path) if 'pairing' in f]
+        pastpairs_csvs.sort()
+        for i, f in enumerate(pastpairs_csvs):
+            fstring = f"[ {i:2d} ] {f}" if len(pastpairs_csvs) > 10 else f"[ {i} ] {f}"
+            if self.verbose:
+                print(f"  [ {i:2d} ] {f}")
+            print(fstring)
+
+        # Prompt user to select a file from the list above.
+        csv_index = input("\nSelect csv with student pairings from past quiz using index: ")
+
+        print(f"\nSelected csv: {pastpairs_csvs[int(csv_index)]}")
+
+        # Open the file and return the dataframe
+        self.df_past_pairings = pd.read_csv(csv_path + pastpairs_csvs[int(csv_index)])
+
+        # Get list of students who were paired in the past and put into long format
+        paired_students1 = self.df_past_pairings[['person1', 'id1']].copy()
+        paired_students1.rename(columns={'person1': 'name', 'id1': 'id'}, inplace=True)
+        paired_students2 = self.df_past_pairings[['person2', 'id2']].copy()
+        paired_students2.rename(columns={'person2': 'name', 'id2': 'id'}, inplace=True)
+        paired_students3 = self.df_past_pairings[['person3', 'id3']].copy()
+        paired_students3.rename(columns={'person3': 'name', 'id3': 'id'}, inplace=True)
+
+        # Get columns person2, id2, from df_past_pairings and append these rows to paired_students
+        paired_students = pd.concat([paired_students1, paired_students2, paired_students3], ignore_index=True)
+
+        # Remove any rows with NaN or -1 values, and reset index
+        paired_students.dropna(inplace=True)
+        paired_students = paired_students[paired_students['id'] != -1]
+        paired_students.reset_index(drop=True, inplace=True)
+        self.df_paired_students = paired_students.drop_duplicates()
+
 
     def createStudentPairings(self, method='med', write_csv=True):
         """ Generate student pairings using one of several methods, but not saved unless write_csv is True. """
@@ -424,7 +476,7 @@ class PicaQuiz:
         axes[0].set_ylabel('# of Student Pairs')
         plt.tight_layout()
         plt.savefig(self.config.figures_path + self.config.quiz_prefix + str(self.canvas_quiz.id) +
-                    "_compare_pairing_methods_" + datetime.datetime.today().strftime('%Y%m%d') + ".png", dpi=200)
+                    "_compare_pairing_methods_" + datetime.today().strftime('%Y%m%d') + ".png", dpi=200)
         plt.close()
 
     def writePairingsCSV(self, method, pairs):
@@ -471,5 +523,116 @@ class PicaQuiz:
         df_pairs = pd.DataFrame({'person1': name1, 'person2': name2, 'person3': name3,
                                  'id1': person1, 'id2': person2, 'id3': person3, 'distance': [x[-1] for x in pairs]})
         pairs_csv = self.config.data_path + self.config.quiz_prefix + str(self.canvas_quiz.id) + \
-            "_pairing_via_" + method + "_" + datetime.datetime.today().strftime('%Y%m%d') + ".csv"
+            "_pairing_via_" + method + "_" + datetime.today().strftime('%Y%m%d') + ".csv"
         df_pairs.to_csv(pairs_csv, index=False)
+
+    def checkForBonusEarned(self, bonus_amount=0.2):
+        """ Check if any students have a distance of 0 with their partner. """
+
+        # Rename the column 'distance' to 'previous_distance' in df_past_pairings
+        self.df_past_pairings.rename(columns={'distance': 'previous_distance'}, inplace=True)
+
+        # Create a new column 'distance' in df_past_pairings and set it to 0
+        self.df_past_pairings['distance'] = 0.0
+
+        # Create a new column 'bonus' in df_paired_students and set it to 0
+        self.df_paired_students['bonus'] = 0.0
+
+        # set bonus_to_add to be added as a percentage of the total points possible, or as a fixed number of points
+        if bonus_amount < 1.0:
+            bonus = round(bonus_amount * self.canvas_quiz.points_possible)
+        else:
+            bonus = bonus_amount
+
+        # Iterate through each row of df_past_pairings
+        for i, row in self.df_past_pairings.iterrows():
+            person1 = row['id1']
+            person2 = row['id2']
+            dist = self.dist_matrix.loc[person1, person2]
+            person3 = row['id3']
+            if person3 > 0:
+                dist = max(dist, self.dist_matrix.loc[person1, person3], self.dist_matrix.loc[person2, person3])
+            self.df_past_pairings.at[i, 'distance'] = dist
+
+            if dist <= 0.01:
+                self.df_paired_students.loc[self.df_paired_students['id'] == person1, 'bonus'] = bonus
+                self.df_paired_students.loc[self.df_paired_students['id'] == person2, 'bonus'] = bonus
+                if person3 > 0:
+                    self.df_paired_students.loc[self.df_paired_students['id'] == person3, 'bonus'] = bonus
+
+    def getUserQuizEvents(self):
+        quiz_takers = self.quiz_df[['name', 'id']].copy()
+
+        # Define a user_events dataframe with columns 'name', 'id', 'event', 'timestamp'
+        user_events = pd.DataFrame(columns=['name', 'id', 'event', 'timestamp'])
+
+        subs = self.canvas_quiz.get_submissions()
+        for i, sub in enumerate(subs):
+            # Get row from quiz_takers where column 'id' matches sub.user_id
+            row = quiz_takers[quiz_takers['id'] == sub.user_id]
+
+            # Get user submission events for this submission
+            events = sub.get_submission_events()
+            for event in events:
+                user_events.loc[len(user_events)] = [row['name'].values[0], sub.user_id, event.event_type, event.created_at]
+
+        user_events_csv = self.config.data_path + self.config.quiz_prefix + str(self.canvas_quiz.id) + \
+            "_user_events_ " + datetime.today().strftime('%Y%m%d') + ".csv"
+        user_events.to_csv(user_events_csv, index=False)
+
+
+    def awardBonusPoints(self):
+        """ Award bonus points to students who received it by setting fudge points. """
+        quiz_summary = self.quiz_df[['name', 'id', 'n_correct', 'n_incorrect', 'score']].copy()
+
+        # Left join quiz_summary with df_paired_students on 'id' to get bonus points
+        quiz_summary = pd.merge(quiz_summary, self.df_paired_students[['id', 'bonus']], on='id', how='left')
+
+        # Fill NaN values in 'bonus' column with -1.0
+        quiz_summary.fillna(-1.0, inplace=True)
+
+        # Create new columns for start, finish, minutes, and score_w_bonus and set them to 0
+        quiz_summary['start'] = 'n/a'
+        quiz_summary['finish'] = 'n/a'
+        quiz_summary['minutes'] = 0.0
+        quiz_summary['score_w_bonus'] = 0.0
+
+        # Sort quiz_summary by the second word in 'name' column
+        quiz_summary['lastname'] = quiz_summary['name'].str.split().str[1]
+        quiz_summary.sort_values(by='lastname', inplace=True)
+        quiz_summary.drop(columns='lastname', inplace=True)
+        quiz_summary.reset_index(drop=True, inplace=True)
+
+        subs = self.canvas_quiz.get_submissions()
+        for i, sub in enumerate(subs):
+            # Get row from quiz_summary where column 'id' matches sub.user_id
+            row = quiz_summary[quiz_summary['id'] == sub.user_id]
+
+            # Confirm that the sub.score matches row['score'] using an assert statement
+            assert abs(sub.score - row['score'].values[0]) < 0.001
+
+            # Set quiz_summary for this user_id and column 'start' with string in sub.started_at
+            quiz_summary.at[row.index[0], 'start'] = sub.started_at
+            quiz_summary.at[row.index[0], 'finish'] = sub.finished_at
+            quiz_summary.at[row.index[0], 'minutes'] = sub.time_spent / 60.0
+
+            # Check if bonus needs to be added
+            if row['bonus'].values[0] > 0:
+
+                # Set points before fudget points are added
+                newattributes = { 'excused?': True, 'score_before_regrade': sub.score }
+                upd1 = sub.set_attributes(newattributes)
+
+                # Now set fudge points
+                update_obj = [ { 'attempt': sub.attempt, 'fudge_points': row['bonus'].values[0] } ]
+                sub.update_score_and_comments(quiz_submissions=update_obj)
+
+                # Set quiz_summary for this user_id and column 'score_w_bonus' with sub.score + row['bonus']
+                quiz_summary.at[row.index[0], 'score_w_bonus'] = row['score'].values[0] + row['bonus'].values[0]
+
+            else:
+                quiz_summary.at[row.index[0], 'score_w_bonus'] = row['score'].values[0]
+
+        quiz_summary_csv = self.config.data_path + self.config.quiz_prefix + str(self.canvas_quiz.id) + \
+            "_scores_w_bonus_ " + datetime.today().strftime('%Y%m%d') + ".csv"
+        quiz_summary.to_csv(quiz_summary_csv, index=False)
