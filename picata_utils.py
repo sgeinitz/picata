@@ -1,5 +1,6 @@
 import os
 import re
+import sys
 import random
 import requests
 import time
@@ -198,9 +199,11 @@ class PicaQuiz:
 
         quiz_report_progress = self.canvas.get_progress(request_id)
         while quiz_report_progress.workflow_state != 'completed':
-            print(f"  report progress: {quiz_report_progress.completion}% completed")
-            time.sleep(0.5)
+            #print(f"  report progress: {quiz_report_progress.completion}% completed")
+            self.progressBar(quiz_report_progress.completion, 100)
+            time.sleep(0.1)
             quiz_report_progress = self.canvas.get_progress(request_id)
+        print("\nQuiz download complete!")
 
         quiz_report = self.canvas_quiz.get_quiz_report(quiz_report_request)
         quiz_csv_url = quiz_report.file['url']
@@ -245,6 +248,15 @@ class PicaQuiz:
         if self.verbose:
             for key, val in self.question_stats.items():
                 print("key =", key, "->", val)
+
+    def progressBar(self, current, total, bar_length=20):
+        """ Displays or updates a console progress bar. """
+        progress = current / total
+        arrow = '=' * int(progress * bar_length - 1) + '>' if current < total else '=' * bar_length
+        spaces = ' ' * (bar_length - len(arrow))
+        percent = int(progress * 100)
+        sys.stdout.write(f"\r[{arrow}{spaces}] {percent}%")
+        sys.stdout.flush()
 
     def generateQuestionHistograms(self):
         """ Draw a histogram of scores of each question. """
