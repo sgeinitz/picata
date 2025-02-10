@@ -143,6 +143,7 @@ class PicaCourse:
         """ Retrieve the selected course and get list of all students. """
         self.canvas_course = canvas_course
         self.students = []
+        self.verbose = verbose
         student = None
         for i, student in enumerate(self.canvas_course.get_enrollments()):
             # Use print(f"dir(student): {dir(student)}") to see all attributes
@@ -203,6 +204,7 @@ class PicaQuiz:
             self.progressBar(quiz_report_progress.completion, 100)
             time.sleep(0.1)
             quiz_report_progress = self.canvas.get_progress(request_id)
+        self.progressBar(quiz_report_progress.completion, 100)
         print("\nQuiz download complete!")
 
         quiz_report = self.canvas_quiz.get_quiz_report(quiz_report_request)
@@ -388,6 +390,29 @@ class PicaQuiz:
         paired_students.reset_index(drop=True, inplace=True)
         self.df_paired_students = paired_students.drop_duplicates()
 
+    def getPastBonusCSV(self, csv_path=None):
+
+        """ Prompt for a CSV that contains past pairings for this quiz and return a pandas dataframe. """
+        if not csv_path:
+            csv_path = self.config.data_path
+        print("\nCSV Options:")
+
+        # List all files in current directory that contain the string: 'pairing'.
+        pastbonus_csvs = [f for f in os.listdir(csv_path) if 'w_bonus' in f]
+        pastbonus_csvs.sort()
+        for i, f in enumerate(pastbonus_csvs):
+            fstring = f"[ {i:2d} ] {f}" if len(pastbonus_csvs) > 10 else f"[ {i} ] {f}"
+            if self.verbose:
+                print(f"  [ {i:2d} ] {f}")
+            print(fstring)
+
+        # Prompt user to select a file from the list above.
+        csv_index = input("\nSelect csv with past student bonus awards using index: ")
+
+        print(f"\nSelected csv: {pastbonus_csvs[int(csv_index)]}")
+
+        # Open the file and return the dataframe
+        self.df_past_bonus = pd.read_csv(csv_path + pastbonus_csvs[int(csv_index)])
 
     def createStudentPairings(self, method='med', write_csv=True):
         """ Generate student pairings using one of several methods, but not saved unless write_csv is True. """
@@ -589,9 +614,8 @@ class PicaQuiz:
                 user_events.loc[len(user_events)] = [row['name'].values[0], sub.user_id, event.event_type, event.created_at]
 
         user_events_csv = self.config.data_path + self.config.quiz_prefix + str(self.canvas_quiz.id) + \
-            "_user_events_ " + datetime.today().strftime('%Y%m%d') + ".csv"
+            "_user_events_" + datetime.today().strftime('%Y%m%d') + ".csv"
         user_events.to_csv(user_events_csv, index=False)
-
 
     def awardBonusPoints(self):
         """ Award bonus points to students who received it by setting fudge points. """
@@ -646,5 +670,58 @@ class PicaQuiz:
                 quiz_summary.at[row.index[0], 'score_w_bonus'] = row['score'].values[0]
 
         quiz_summary_csv = self.config.data_path + self.config.quiz_prefix + str(self.canvas_quiz.id) + \
-            "_scores_w_bonus_ " + datetime.today().strftime('%Y%m%d') + ".csv"
+            "_scores_w_bonus_" + datetime.today().strftime('%Y%m%d') + ".csv"
         quiz_summary.to_csv(quiz_summary_csv, index=False)
+
+    # 1) Need to consider making sure this can run multiple times without continually adding bonus 
+    #    points (since if it is run twice, then sub.score might include a previously added bonus) one
+    #    way is to look and see if sub.fudge_points is already set, and if so, then don't add bonus points
+    # 2) also may want to check when get_submissions does not return a student's highest submission, as 
+    #    happned with Kevin O'Connel in 4050, Quiz 1B (spring25), where his attempt=3 was 3.93 but get_submissions 
+    #    returned attempt=4 with a score of 3.73; could this be addressed with sub.kept_score vs sub.score?
+    #    (see https://canvas.instructure.com/doc/api/quiz_submissions.html)
+    def reAwardBonusPoints(self):
+        """ Re-award bonus points by setting fudge points for the highest submission attempt. """
+        past_bonus = self.df_past_bonus.copy()
+        past_bonus['new_score'] = past_bonus['score']
+        past_bonus['start_new']  = 'n/a'
+        past_bonus['finish_new'] = 'n/a'
+        past_bonus['minutes_new'] = -1
+        past_bonus['new_score_w_bonus'] = past_bonus['score_w_bonus']
+
+        subs = self.canvas_quiz.get_submissions()
+        for i, sub in enumerate(subs):
+
+            # no bonus to award if user_id not in past_bonus
+            if sub.user_id not in past_bonus['id'].values:
+                continue
+
+            # Get row from quiz_summary where column 'id' matches sub.user_id
+            row = past_bonus[past_bonus['id'] == sub.user_id]
+            if self.verbose:
+                print(f"name = {past_bonus.at[row.index[0], 'name']}")
+                print(f"  sub.user_id = {sub.user_id}, sub.attempt = {sub.attempt}, sub.score = {sub.score}, sub.fudge_points = {sub.fudge_points}")
+
+            # Update past_bonus df for this user_id
+            past_bonus.at[row.index[0], 'new_score'] = sub.score
+            past_bonus.at[row.index[0], 'start_new'] = sub.started_at
+            past_bonus.at[row.index[0], 'finish_new'] = sub.finished_at
+            past_bonus.at[row.index[0], 'minutes_new'] = sub.time_spent / 60.0
+
+            # Check that past score with bonus is greater than current sub score
+            if row['bonus'].values[0] > 0 and row['score'].values[0] < sub.score:
+
+                # Set points before fudget points are added
+                newattributes = { 'excused?': True, 'score_before_regrade': sub.score }
+                upd1 = sub.set_attributes(newattributes)
+
+                # Now set fudge points
+                update_obj = [ { 'attempt': sub.attempt, 'fudge_points': row['bonus'].values[0] } ]
+                sub.update_score_and_comments(quiz_submissions=update_obj)
+
+                # Set past_bonus for this user_id and column 'new_score_w_bonus' with sub.score + row['bonus']
+                past_bonus.at[row.index[0], 'new_score_w_bonus'] = sub.score + row['bonus'].values[0]
+
+        past_bonus_csv = self.config.data_path + self.config.quiz_prefix + str(self.canvas_quiz.id) + \
+            "_scores_w_bonus_new_" + datetime.today().strftime('%Y%m%d') + ".csv"
+        past_bonus.to_csv(past_bonus_csv, index=False)

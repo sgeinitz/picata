@@ -6,18 +6,18 @@ import canvasapi
 import picata_utils as pu
 import picata_config as pc
 
-tasks = ['pair', 'bonus', 'activity']
+tasks = ['activity', 'award-bonus', 'pair', 're-award-bonus']
 task = None
 
 if len(sys.argv) < 2:
-    print(f"Usage: picata {'|'.join(tasks)}")
+    print(f"Usage: picata {' | '.join(tasks)}")
     sys.exit(1)
 else: 
     task = sys.argv[1]
 
 if task not in tasks:
     # prompt the user to select a task
-    task_ind = input("Select a valid task: [0] pair, [1] bonus, or [2] activity\n")
+    task_ind = input("Select a valid task: [0] activity, [1] award-bonus, [2] pair, or [3] re-award-bonus\n")
     task_ind = int(re.sub(r'\D', '', task_ind))
     if task_ind < 0 or task_ind > 2:
         print("Invalid task selected. Exiting.")
@@ -49,7 +49,7 @@ pica_course = pu.PicaCourse(chosen_course, pica_config, verbose=False)
 if task == 'activity':
     pica_course.saveStudentActivity(pica_config.data_path)
 
-elif task in ['pair', 'bonus']:
+elif task in ['pair', 'award-bonus', 're-award-bonus']:
     # Prompt user to select a quiz
     chosen_quiz = pu.selectFromList(chosen_course.get_quizzes(), "quiz")
     print(f"\nSelected quiz: {chosen_quiz.title}")
@@ -71,7 +71,7 @@ elif task in ['pair', 'bonus']:
         # Generate pairings for today using the median method
         pica_quiz.createStudentPairings(method='med', write_csv=True)
 
-    elif task == 'bonus':
+    elif task == 'award-bonus':
         # Prompt user to find the pairings CSV file
         pica_quiz.getPastPairingsCSV()
 
@@ -80,5 +80,12 @@ elif task in ['pair', 'bonus']:
 
         # Award bonus points to students who received it by setting fudge points
         pica_quiz.awardBonusPoints()
+
+    elif task == 're-award-bonus':
+        # Prompt user to find the pairings CSV file
+        pica_quiz.getPastBonusCSV()
+
+        # Re-Award bonus points to students who received it by setting fudge points
+        pica_quiz.reAwardBonusPoints()
 
 print("\n** Done ***\n")
