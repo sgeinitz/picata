@@ -708,8 +708,8 @@ class PicaQuiz:
             past_bonus.at[row.index[0], 'finish_new'] = sub.finished_at
             past_bonus.at[row.index[0], 'minutes_new'] = sub.time_spent / 60.0
 
-            # Check that past score with bonus is greater than current sub score
-            if row['bonus'].values[0] > 0 and row['score'].values[0] < sub.score:
+            # Check bonus was received before and new score is better than past score (w/o bonus)
+            if row['bonus'].values[0] > 0 and sub.score > row['score'].values[0]:
 
                 # Set points before fudget points are added
                 newattributes = { 'excused?': True, 'score_before_regrade': sub.score }
@@ -719,7 +719,7 @@ class PicaQuiz:
                 update_obj = [ { 'attempt': sub.attempt, 'fudge_points': row['bonus'].values[0] } ]
                 sub.update_score_and_comments(quiz_submissions=update_obj)
 
-                # Set past_bonus for this user_id and column 'new_score_w_bonus' with sub.score + row['bonus']
+                # Update 'new_score_w_bonus' using sub.score + row['bonus']
                 past_bonus.at[row.index[0], 'new_score_w_bonus'] = sub.score + row['bonus'].values[0]
 
         past_bonus_csv = self.config.data_path + self.config.quiz_prefix + str(self.canvas_quiz.id) + \
