@@ -677,9 +677,10 @@ class PicaQuiz:
     #    points (since if it is run twice, then sub.score might include a previously added bonus) one
     #    way is to look and see if sub.fudge_points is already set, and if so, then don't add bonus points
     # 2) also may want to check when get_submissions does not return a student's highest submission, as 
-    #    happned with Kevin O'Connel in 4050, Quiz 1B (spring25), where his attempt=3 was 3.93 but get_submissions 
-    #    returned attempt=4 with a score of 3.73; could this be addressed with sub.kept_score vs sub.score?
-    #    (see https://canvas.instructure.com/doc/api/quiz_submissions.html)
+    #    happned with K.O. in 4050, Quiz 1B (spring25), where their attempt=3 was 3.93 but get_submissions 
+    #    returned attempt=4 with a score of 3.73, this would require getting all of the attempts for a person... see
+    #    https://community.canvaslms.com/t5/Archived-Questions/Get-All-Quiz-Submissions-API-not-working/m-p/218389
+    #    and  https://canvas.instructure.com/doc/api/quiz_submissions.html
     def reAwardBonusPoints(self):
         """ Re-award bonus points by setting fudge points for the highest submission attempt. """
         past_bonus = self.df_past_bonus.copy()
