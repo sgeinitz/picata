@@ -688,6 +688,7 @@ class PicaQuiz:
         past_bonus['start_new']  = 'n/a'
         past_bonus['finish_new'] = 'n/a'
         past_bonus['minutes_new'] = -1
+        past_bonus['minutes_new'] = past_bonus['minutes_new'].astype(float)
         past_bonus['new_score_w_bonus'] = past_bonus['score_w_bonus']
 
         subs = self.canvas_quiz.get_submissions()

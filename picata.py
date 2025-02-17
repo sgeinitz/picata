@@ -19,7 +19,7 @@ if task not in tasks:
     # prompt the user to select a task
     task_ind = input("Select a valid task: [0] activity, [1] award-bonus, [2] pair, or [3] re-award-bonus\n")
     task_ind = int(re.sub(r'\D', '', task_ind))
-    if task_ind < 0 or task_ind > 2:
+    if task_ind < 0 or task_ind > 3:
         print("Invalid task selected. Exiting.")
         sys.exit(1)
     else:
