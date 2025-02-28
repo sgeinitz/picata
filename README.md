@@ -1,11 +1,11 @@
 
-## PICATA: Data-driven Peer Instruction and Continuous Assessment via a (digital) Teaching Assistant
+## PICATA: Peer Instruction and Continuous Assessment via a (digital) Teaching Assistant
 
 ### Overview 
 
 PICATA is a tool for instructors who wish to combine Peer Instruction (PI) and
 Continuous Assessments (CA) utilizing results from students' earlier CA data.
-For more information on the PICA method see this [paper](https://link.springer.com/chapter/10.1007/978-3-031-74627-7_1).   
+For more information on the PICA method see this [paper](https://link.springer.com/chapter/10.1007/978-3-031-74627-7_1).
 
 Currently, this terminal-based tool works with the Canvas Learning Management System (LMS) using the 
 [CanvasAPI](https://github.com/ucfopen/canvasapi). In addition to increased functionality, development 
