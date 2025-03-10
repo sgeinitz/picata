@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
-import os
-import re
 import sys
-import canvasapi
-import picata_utils as pu
-import picata_config as pc
 
 tasks = ['activity', 'award-bonus', 'pair', 're-award-bonus']
 task = None
@@ -15,15 +10,25 @@ if len(sys.argv) < 2:
 else: 
     task = sys.argv[1]
 
-if task not in tasks:
-    # prompt the user to select a task
-    task_ind = input("Select a valid task: [0] activity, [1] award-bonus, [2] pair, or [3] re-award-bonus\n")
-    task_ind = int(re.sub(r'\D', '', task_ind))
-    if task_ind < 0 or task_ind > 3:
-        print("Invalid task selected. Exiting.")
-        sys.exit(1)
-    else:
-        task = tasks[task_ind]
+if task == "help" or task == "--help":
+    print(f"Usage: picata.py [{'|'.join(tasks)}]")
+    sys.exit(1)
+
+#elif task not in tasks:
+#    # prompt the user to select a task
+#    task_ind = input("Select a valid task: [0] activity, [1] award-bonus, [2] pair, or [3] re-award-bonus\n")
+#    task_ind = int(re.sub(r'\D', '', task_ind))
+#    if task_ind < 0 or task_ind > 3:
+#        print("Invalid task selected. Exiting.")
+#        sys.exit(1)
+#    else:
+#        task = tasks[task_ind]
+
+import os
+import re
+import canvasapi
+import picata_utils as pu
+import picata_config as pc
 
 # User/instructor must first have created and downloaded a token in Canvas, and
 # set up environment vars appropriately (e.g. 'source <file w/ canvas info>').
