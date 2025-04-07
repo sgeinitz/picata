@@ -599,17 +599,22 @@ class PicaQuiz:
 
     def getUserQuizEvents(self):
         quiz_takers = self.quiz_df[['name', 'id']].copy()
+        #quiz_takers = pica_quiz.quiz_df[['name', 'id']].copy()
 
         # Define a user_events dataframe with columns 'name', 'id', 'event', 'timestamp'
         user_events = pd.DataFrame(columns=['name', 'id', 'event', 'timestamp'])
 
         subs = self.canvas_quiz.get_submissions()
+        #subs = pica_quiz.canvas_quiz.get_submissions()
         for i, sub in enumerate(subs):
             # Get row from quiz_takers where column 'id' matches sub.user_id
             row = quiz_takers[quiz_takers['id'] == sub.user_id]
+            if len(row) == 0: # no quiz taker found for this user
+                continue
 
             # Get user submission events for this submission
             events = sub.get_submission_events()
+
             for event in events:
                 user_events.loc[len(user_events)] = [row['name'].values[0], sub.user_id, event.event_type, event.created_at]
 
