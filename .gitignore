@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+visualize_events.ipynb
 
 # any data figures and their directories
 *.csv
