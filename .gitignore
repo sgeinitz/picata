@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+.vscode/launch.json
 
 visualize_events.ipynb
 

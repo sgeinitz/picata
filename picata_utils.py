@@ -148,8 +148,12 @@ class PicaCourse:
         for i, student in enumerate(self.canvas_course.get_enrollments()):
             # Use print(f"dir(student): {dir(student)}") to see all attributes
             if student.role == 'StudentEnrollment' and student.enrollment_state == 'active' and student.sis_user_id is not None:
-                student.user['total_activity_time'] = student.total_activity_time
-                student.user['last_activity_at'] = student.last_activity_at
+                student.user['total_activity_time'] = None
+                if hasattr(student, 'total_activity_time') and isinstance(student.total_activity_time, (int, float)):
+                    student.user['total_activity_time'] = student.total_activity_time
+                student.user['last_activity_at'] = None
+                if hasattr(student, 'last_activity_at') and isinstance(student.last_activity_at, (int, float)):
+                    student.user['last_activity_at'] = student.last_activity_at
                 self.students.append(student.user)
         if verbose:
             print(self.students)
@@ -344,7 +348,9 @@ class PicaQuiz:
         print(f"  *** (double check there are {len(self.df_present)} students present today) ***")
 
         self.df_quiz_scores_present = pd.merge(self.df_present[['name', 'id']], self.quiz_df, how='left')  # on=['name','id'])
-        self.df_quiz_scores_present.fillna(0, inplace=True)  # replace missing values with zero (for people who missed the pre-quiz)
+        # replace missing vals with zero (for people who missed pre-quiz)
+        with pd.option_context("future.no_silent_downcasting", True):
+            self.df_quiz_scores_present = self.df_quiz_scores_present.fillna(0).infer_objects(copy=False)
         if self.verbose:
             print(f"self.df_quiz_scores_present.columns = {self.df_quiz_scores_present.columns}")
         assert len(self.df_quiz_scores_present) == len(self.df_present)
@@ -630,7 +636,8 @@ class PicaQuiz:
         quiz_summary = pd.merge(quiz_summary, self.df_paired_students[['id', 'bonus']], on='id', how='left')
 
         # Fill NaN values in 'bonus' column with -1.0
-        quiz_summary.fillna(-1.0, inplace=True)
+        with pd.option_context("future.no_silent_downcasting", True):
+            quiz_summary = quiz_summary.fillna(-1.0).infer_objects(copy=False)
 
         # Create new columns for start, finish, minutes, and score_w_bonus and set them to 0
         quiz_summary['start'] = 'n/a'
