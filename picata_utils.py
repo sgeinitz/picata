@@ -159,14 +159,26 @@ class PicaCourse:
             print(self.students)
 
     def saveStudentActivity(self, data_path):
-        """ Save student activity data to a CSV file (unfortunately, trying to get more information
-        using, say, u = course.get_user(user=id), and then u.get_pages_views() is not allowed). """
+        """ Get student activity from two sources and save to csv files """
+        student_summary_data = self.canvas_course.get_course_level_student_summary_data()
+        summ_acts = pd.DataFrame(columns=['id', 'page_views', 'missing', 'late'])
+        for s in student_summary_data:
+            summ_acts.loc[len(summ_acts)] = [s.id, s.page_views, s.tardiness_breakdown['missing'], s.tardiness_breakdown['late']]
+        summ_activity_csv = data_path + "course_activity_partA_" + datetime.today().strftime('%Y%m%d') + ".csv"
+        summ_acts.to_csv(summ_activity_csv, index=False)
+
         acts = pd.DataFrame(columns=['name', 'id', 'total_activity_mins', 'last_activity_at'])
         for s in self.students:
             acts.loc[len(acts)] = [s['name'], s['id'], s['total_activity_time'] / 60.0, s['last_activity_at']]
-
-        activity_csv = data_path + "course_activity_" + datetime.today().strftime('%Y%m%d') + ".csv"
+        activity_csv = data_path + "course_activity_partB_" + datetime.today().strftime('%Y%m%d') + ".csv"
         acts.to_csv(activity_csv, index=False)
+
+        # do an outer join of summ_acts and acts on 'id' column and save to csv file
+        merged_acts = pd.merge(summ_acts, acts, on='id', how='outer')
+        merged_acts = merged_acts[['name', 'id', 'page_views', 'missing', 'late', 'total_activity_mins', 'last_activity_at']]
+        merged_acts_csv = data_path + "course_activity_both_" + datetime.today().strftime('%Y%m%d') + ".csv"
+        merged_acts.to_csv(merged_acts_csv, index=False)
+
 
 class PicaQuiz:
     """ A class for one quiz and associated attributes/data. """
