@@ -301,11 +301,13 @@ class PicaQuiz:
 
         for i, id1 in enumerate(student_ids):
             x = quiz_df_local.loc[quiz_df_local.id == id1, quiz_df_local.columns.str.endswith('_score')].to_numpy().flatten()
+            x = [0.0 if pd.isna(val) else val for val in x]
             if self.verbose:
                 print(id1, "values =", x)
             for j, id2 in enumerate(student_ids):
                 if i < j:
                     y = quiz_df_local.loc[quiz_df_local.id == id2, quiz_df_local.columns.str.endswith('_score')].to_numpy().flatten()
+                    y = [0.0 if pd.isna(val) else val for val in y]
                     if self.verbose:
                         print(id2, "    values =", y)
                     if distance_type == 'euclid':
@@ -732,7 +734,10 @@ class PicaQuiz:
             past_bonus.at[row.index[0], 'new_score'] = sub.score
             past_bonus.at[row.index[0], 'start_new'] = sub.started_at
             past_bonus.at[row.index[0], 'finish_new'] = sub.finished_at
-            past_bonus.at[row.index[0], 'minutes_new'] = sub.time_spent / 60.0
+            if sub.time_spent is not None:
+                past_bonus.at[row.index[0], 'minutes_new'] = sub.time_spent / 60.0
+            else:
+                past_bonus.at[row.index[0], 'minutes_new'] = -1.0
 
             # Check bonus was received before and new score is better than past score (w/o bonus)
             if row['bonus'].values[0] > 0 and sub.score > row['score'].values[0]:
